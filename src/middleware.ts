@@ -6,8 +6,6 @@ import { EnumTokens } from './services/auth-token.service'
 export async function middleware(request: NextRequest) {
 	const { cookies, nextUrl } = request
 	const { pathname } = nextUrl
-	console.log(cookies)
-	console.log(nextUrl)
 
 	const hasRefreshToken = Boolean(cookies.get(EnumTokens.REFRESH_TOKEN)?.value)
 	const isAuthPage = pathname === '/auth' || pathname.startsWith('/auth/')
@@ -27,5 +25,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ['/i/:path*', '/auth/:path']
+	matcher: ['/i/:path*', '/auth/:path*']
 }
