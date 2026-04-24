@@ -6,7 +6,6 @@ import { useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { Heading } from '@/src/components/ui/Heading'
 import { Button } from '@/src/components/ui/buttons/Button'
 import { Field } from '@/src/components/ui/fields/Field'
 import { DASHBOARD_PAGES } from '@/src/config/pages-url.config'
@@ -15,7 +14,7 @@ import { AuthForm } from '@/src/types/auth.types'
 
 export default function Auth() {
 	const { register, handleSubmit, reset } = useForm<AuthForm>()
-	const [isLoginForm, setIsLoginForm] = useState(false)
+	const [isLoginForm, setIsLoginForm] = useState(true)
 	const { push } = useRouter()
 
 	const { mutate, isPending } = useMutation({
@@ -34,28 +33,29 @@ export default function Auth() {
 	}
 
 	return (
-		<div className='relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(82,178,122,0.22),_transparent_34%),linear-gradient(155deg,_#06100c_0%,_#0c1d16_52%,_#04100b_100%)] px-4 py-10 text-white'>
+		<div className='relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10'>
 			<div className='absolute left-[-5rem] top-[-4rem] h-56 w-56 rounded-full bg-emerald-300/10 blur-3xl' />
 			<div className='absolute bottom-[-6rem] right-[-4rem] h-72 w-72 rounded-full bg-lime-200/10 blur-3xl' />
 
 			<form
-				className='relative z-10 w-full max-w-md rounded-[28px] border border-white/15 bg-white/10 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.38)] backdrop-blur-2xl'
+				className='relative z-10 w-full max-w-md rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))] p-8 shadow-[0_24px_80px_rgba(0,0,0,0.32)] backdrop-blur-2xl'
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				<div className='mb-8'>
 					<p className='mb-3 text-xs uppercase tracking-[0.32em] text-emerald-100/60'>
 						Plant Care
 					</p>
-					<div className='text-white'>
-						<Heading title='Авторизация' />
-					</div>
+					<h1 className='text-3xl font-semibold tracking-tight text-white'>
+						{isLoginForm ? 'Вход в аккаунт' : 'Создание аккаунта'}
+					</h1>
 					<p className='mt-4 text-sm leading-6 text-white/65'>
-						Войдите в аккаунт или создайте новый профиль для управления своими
-						растениями.
+						{isLoginForm
+							? 'Войдите в кабинет и продолжайте следить за своей коллекцией растений.'
+							: 'Создайте профиль, чтобы управлять своей домашней оранжереей в одном месте.'}
 					</p>
 				</div>
 
-				<div className='mb-6 grid grid-cols-2 rounded-[16px] border border-white/10 bg-black/15 p-1 gap-1'>
+				<div className='mb-6 grid grid-cols-2 gap-1 rounded-[18px] border border-white/10 bg-black/15 p-1'>
 					<Button
 						type='button'
 						className={`border-0 px-4 py-3 ${
@@ -110,7 +110,7 @@ export default function Auth() {
 								: 'Создать аккаунт'}
 					</Button>
 					<p className='text-center text-sm text-white/50'>
-						Безопасный доступ к вашему личному оранжерейному кабинету.
+						Спокойный интерфейс для вашего домашнего зелёного пространства.
 					</p>
 				</div>
 			</form>

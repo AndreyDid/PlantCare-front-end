@@ -30,12 +30,22 @@ export default function RootLayout({
 			lang='ru'
 			className={zen.variable}
 		>
-			<body className='min-h-full flex flex-col'>
+			<body className='flex min-h-screen flex-col'>
 				<Providers>
 					{children}
 					<Toaster
 						position='top-center'
 						duration={1500}
+						toastOptions={{
+							classNames: {
+								toast:
+									'!rounded-2xl !border !border-white/10 !bg-[#0d1a15]/95 !text-white !shadow-[0_20px_60px_rgba(0,0,0,0.35)]',
+								description: '!text-white/65',
+								actionButton:
+									'!bg-emerald-300 !text-slate-950',
+								cancelButton: '!bg-white/10 !text-white'
+							}
+						}}
 					></Toaster>
 				</Providers>
 			</body>
