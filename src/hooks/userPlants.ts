@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userPlantService } from '../services/userPlant.service'
 
@@ -8,4 +8,16 @@ export function useUserPlants() {
 		queryFn: () => userPlantService.get()
 	})
 	return { data, isLoading }
+}
+
+export function useDeleteUserPlant(id: string) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: () => userPlantService.delete(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ['userPlants']
+			})
+		}
+	})
 }

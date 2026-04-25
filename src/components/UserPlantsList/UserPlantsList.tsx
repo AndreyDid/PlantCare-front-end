@@ -1,14 +1,10 @@
 'use client'
 
-import { Leaf, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
+
+import { UserPlantCard } from '../UserPlantCard/UserPlantCard'
 
 import { useUserPlants } from '@/src/hooks/userPlants'
-
-const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
-	day: '2-digit',
-	month: 'long',
-	year: 'numeric'
-})
 
 function PlantCardSkeleton() {
 	return (
@@ -62,40 +58,12 @@ export function UserPlantsList() {
 	}
 
 	return (
-		<div className='grid gap-4 xl:grid-cols-2'>
+		<div className='grid gap-4 xl:grid-cols-4'>
 			{plants.map(plant => (
-				<article
+				<UserPlantCard
 					key={plant.id}
-					className='rounded-[26px] border border-white/10 bg-[linear-gradient(180deg,rgba(0,0,0,0.18),rgba(255,255,255,0.04))] p-5 shadow-[0_16px_46px_rgba(0,0,0,0.22)]'
-				>
-					<div className='mb-6 flex items-start justify-between gap-4'>
-						<div>
-							<p className='mb-2 text-xs uppercase tracking-[0.28em] text-emerald-100/55'>
-								Plant Profile
-							</p>
-							<h3 className='text-2xl font-semibold text-white'>
-								{plant.nickname || plant.plantName}
-							</h3>
-							<p className='mt-2 text-sm text-white/55'>
-								Добавлено {dateFormatter.format(new Date(plant.createdAt))}
-							</p>
-						</div>
-						<div className='flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-emerald-200'>
-							<Leaf size={20} />
-						</div>
-					</div>
-
-					<div className='grid gap-3 sm:grid-cols-1'>
-						<div className='rounded-2xl border border-white/8 bg-white/5 p-4'>
-							<p className='text-xs uppercase tracking-[0.24em] text-white/45'>
-								Вид
-							</p>
-							<p className='mt-3 text-base font-medium text-white'>
-								{plant.plantName}
-							</p>
-						</div>
-					</div>
-				</article>
+					plant={plant}
+				/>
 			))}
 		</div>
 	)
