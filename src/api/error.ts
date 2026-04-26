@@ -1,8 +1,18 @@
-export const errorCatch = (error): string => {
-	const message = error?.response?.data?.message
+import { isAxiosError } from 'axios'
+
+type ErrorResponse = {
+	message?: string | string[]
+}
+
+export const errorCatch = (error: unknown): string => {
+	if (!isAxiosError<ErrorResponse>(error)) {
+		return error instanceof Error ? error.message : 'Unknown error'
+	}
+
+	const message = error.response?.data?.message
 
 	return message
-		? typeof error.response.data.message === 'object'
+		? Array.isArray(message)
 			? message[0]
 			: message
 		: error.message
