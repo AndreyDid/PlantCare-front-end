@@ -3,9 +3,9 @@ import { Noto_Sans } from 'next/font/google'
 import { Toaster } from 'sonner'
 
 import { SITE_NAME } from '../constants/seo.constants'
+import { Providers } from './providers'
 
 import './globals.scss'
-import { Providers } from './providers'
 
 const zen = Noto_Sans({
 	subsets: ['cyrillic', 'latin'],
@@ -17,7 +17,8 @@ const zen = Noto_Sans({
 
 export const metadata: Metadata = {
 	title: { default: SITE_NAME, template: `%s | ${SITE_NAME}` },
-	description: 'Приложение для отслеживания состояния комнатных растений'
+	description:
+		'РџСЂРёР»РѕР¶РµРЅРёРµ РґР»СЏ РѕС‚СЃР»РµР¶РёРІР°РЅРёСЏ СЃРѕСЃС‚РѕСЏРЅРёСЏ РєРѕРјРЅР°С‚РЅС‹С… СЂР°СЃС‚РµРЅРёР№'
 }
 
 export default function RootLayout({
@@ -30,7 +31,7 @@ export default function RootLayout({
 			lang='ru'
 			className={zen.variable}
 		>
-			<body className='flex min-h-screen flex-col'>
+			<body>
 				<Providers>
 					{children}
 					<Toaster
@@ -41,12 +42,11 @@ export default function RootLayout({
 								toast:
 									'!rounded-2xl !border !border-white/10 !bg-[#0d1a15]/95 !text-white !shadow-[0_20px_60px_rgba(0,0,0,0.35)]',
 								description: '!text-white/65',
-								actionButton:
-									'!bg-emerald-300 !text-slate-950',
+								actionButton: '!bg-emerald-300 !text-slate-950',
 								cancelButton: '!bg-white/10 !text-white'
 							}
 						}}
-					></Toaster>
+					/>
 				</Providers>
 			</body>
 		</html>

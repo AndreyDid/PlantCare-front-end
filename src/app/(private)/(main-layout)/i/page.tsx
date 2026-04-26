@@ -1,9 +1,6 @@
-import { BellRing, Flower2, Leaf, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
 
 import { CreatePlantForm } from '@/src/components/CreatePlantForm'
-import { Header } from '@/src/components/Header/Header'
-import { LogoutButton } from '@/src/components/LogoutButton/LogoutButton'
 import { UserPlantsList } from '@/src/components/UserPlantsList/UserPlantsList'
 import { NO_INDEX_PAGE } from '@/src/constants/seo.constants'
 
@@ -14,10 +11,12 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
 	return (
-		<div className='relative min-h-screen overflow-x-hidden'>
-			<Header />
-			<div className='absolute left-[-5rem] top-[-4rem] h-56 w-56 rounded-full bg-emerald-300/10 blur-3xl' />
-			<div className='absolute bottom-[-6rem] right-[-4rem] h-72 w-72 rounded-full bg-lime-200/10 blur-3xl' />
+		<div
+		// className='relative min-h-screen overflow-x-hidden'
+		>
+			{/* <Header /> */}
+			{/* <div className='absolute left-[-5rem] top-[-4rem] h-56 w-56 rounded-full bg-emerald-300/10 blur-3xl' />
+			<div className='absolute bottom-[-6rem] right-[-4rem] h-72 w-72 rounded-full bg-lime-200/10 blur-3xl' /> */}
 
 			<div className='relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6'>
 				<div>
