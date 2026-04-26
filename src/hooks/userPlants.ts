@@ -10,6 +10,13 @@ export function useUserPlants() {
 	return { data, isLoading }
 }
 
+export function useGetUserPlantsById(id: string) {
+	return useQuery({
+		queryKey: ['userPlants'],
+		queryFn: () => userPlantService.getById(id)
+	})
+}
+
 export function useDeleteUserPlant(id: string) {
 	const queryClient = useQueryClient()
 	return useMutation({

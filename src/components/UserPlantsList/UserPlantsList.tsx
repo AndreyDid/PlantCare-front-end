@@ -28,7 +28,7 @@ function PlantCardSkeleton() {
 
 export function UserPlantsList() {
 	const { data, isLoading } = useUserPlants()
-	const plants = data?.data ?? []
+	const plants = data ?? []
 
 	if (isLoading) {
 		return (

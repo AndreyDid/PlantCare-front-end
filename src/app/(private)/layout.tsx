@@ -1,4 +1,4 @@
-import { MainLayout } from '../../../components/MainLayout/MainLayout'
+import { MainLayout } from '../../components/MainLayout/MainLayout'
 
 export default function PrivateLayout({
 	children

@@ -1,9 +1,6 @@
-import { BellRing, Flower2, Leaf, Sparkles } from 'lucide-react'
 import type { Metadata } from 'next'
 
 import { CreatePlantForm } from '@/src/components/CreatePlantForm'
-import { Header } from '@/src/components/Header/Header'
-import { LogoutButton } from '@/src/components/LogoutButton/LogoutButton'
 import { UserPlantsList } from '@/src/components/UserPlantsList/UserPlantsList'
 import { NO_INDEX_PAGE } from '@/src/constants/seo.constants'
 

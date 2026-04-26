@@ -4,12 +4,10 @@ import { Header } from '../Header/Header'
 
 export function MainLayout({ children }: PropsWithChildren) {
 	return (
-		<div className='w-100vw h-100vh overflow-hidden'>
-			<main className='flex flex-1 flex-col'>
-				<Header />
-				<div className='flex flex-1 p-4 overflow-auto justify-center'>
-					{children}
-				</div>
+		<div className='min-h-screen'>
+			<Header />
+			<main className='flex min-h-[calc(100vh-57px)] justify-center px-4 py-6 sm:px-6 lg:px-8'>
+				{children}
 			</main>
 		</div>
 	)

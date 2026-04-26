@@ -1,22 +1,30 @@
 import { Trash } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 import { Button } from '../ui/buttons/Button'
 
+import { DASHBOARD_PAGES } from '@/src/config/pages-url.config'
 import { useDeleteUserPlant } from '@/src/hooks/userPlants'
 import { GetPlant } from '@/src/types/plants.types'
 
 export function UserPlantCard({ plant }: { plant: GetPlant }) {
-	const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
-		day: '2-digit',
-		month: 'long',
-		year: 'numeric'
-	})
+	const router = useRouter()
 
 	const { mutate, isPending } = useDeleteUserPlant(plant.id)
 
 	return (
-		<article className='rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(0,0,0,0.18),rgba(255,255,255,0.04))] shadow-[0_16px_46px_rgba(0,0,0,0.22)]'>
+		<div
+			className='cursor-pointer rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(0,0,0,0.18),rgba(255,255,255,0.04))] shadow-[0_16px_46px_rgba(0,0,0,0.22)] transition hover:border-emerald-200/30'
+			onClick={() => router.push(DASHBOARD_PAGES.PLANT(plant.id))}
+			role='link'
+			tabIndex={0}
+			onKeyDown={event => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					router.push(DASHBOARD_PAGES.PLANT(plant.id))
+				}
+			}}
+		>
 			<div className='relative h-65 w-full overflow-hidden rounded-t-2xl'>
 				<Image
 					src='https://avatars.mds.yandex.net/i?id=e946039d12458a4dacf63522da29f18e_sr-12509309-images-thumbs&n=13'
@@ -43,7 +51,10 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 					<Button
 						type='button'
 						disabled={isPending}
-						onClick={() => mutate()}
+						onClick={event => {
+							event.stopPropagation()
+							mutate()
+						}}
 					>
 						<Trash />
 					</Button>
@@ -58,6 +69,6 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 				{/* </div> */}
 				{/* </div> */}
 			</div>
-		</article>
+		</div>
 	)
 }

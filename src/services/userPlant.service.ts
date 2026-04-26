@@ -8,13 +8,19 @@ class UserPlantService {
 	async get() {
 		const response = await axiosWithAuth.get<GetPlant[]>(this.BASE_URL)
 
-		return response
+		return response.data
+	}
+
+	async getById(id: string) {
+		const response = await axiosWithAuth.get<GetPlant>(`${this.BASE_URL}/${id}`)
+
+		return response.data
 	}
 
 	async create(data: PlantForm) {
 		const response = await axiosWithAuth.post<PlantForm>(this.BASE_URL, data)
 
-		return response
+		return response.data
 	}
 	async delete(id: string) {
 		const response = await axiosWithAuth.delete(`${this.BASE_URL}/${id}`)
