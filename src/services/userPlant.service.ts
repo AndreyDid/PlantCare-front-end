@@ -1,4 +1,5 @@
 import {
+	CreateUserPlant,
 	GetPlant,
 	GetUserPlantById,
 	PlantForm,
@@ -24,8 +25,11 @@ class UserPlantService {
 		return response.data
 	}
 
-	async create(data: PlantForm) {
-		const response = await axiosWithAuth.post<PlantForm>(this.BASE_URL, data)
+	async create(data: PlantForm | CreateUserPlant) {
+		const response = await axiosWithAuth.post<GetUserPlantById>(
+			this.BASE_URL,
+			data
+		)
 
 		return response.data
 	}

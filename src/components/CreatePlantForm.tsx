@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Leaf, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -19,6 +19,14 @@ function nullableNumber(value?: string | number | null) {
 	const numberValue = Number(value)
 
 	return Number.isFinite(numberValue) ? numberValue : null
+}
+
+function nullableString(value?: string | number | null) {
+	if (value === null || value === undefined) return null
+
+	const normalizedValue = String(value).trim()
+
+	return normalizedValue ? normalizedValue : null
 }
 
 export function CreatePlantForm() {
@@ -51,16 +59,13 @@ export function CreatePlantForm() {
 		<>
 			<Button
 				type='button'
-				className='group flex w-full items-center justify-center gap-3 rounded-[20px] border-0 bg-gradient-to-r from-emerald-300 via-emerald-400 to-lime-300 px-5 py-3.5 text-base font-semibold text-slate-950 shadow-[0_18px_36px_rgba(72,187,120,0.28)] transition hover:-translate-y-0.5 hover:from-emerald-200 hover:via-emerald-300 hover:to-lime-200 sm:w-auto'
+				className='group flex w-full items-center justify-center gap-3 rounded-[20px] border-0 bg-gradient-to-r from-emerald-300 via-emerald-400 to-lime-300 px-5  text-base font-semibold text-slate-950 shadow-[0_18px_36px_rgba(72,187,120,0.28)] transition hover:-translate-y-0.5 hover:from-emerald-200 hover:via-emerald-300 hover:to-lime-200 sm:w-auto'
 				onClick={() => setIsOpen(true)}
 			>
-				<span className='flex h-10 w-10 items-center justify-center rounded-2xl bg-black/10 text-slate-950 transition group-hover:bg-black/15'>
+				<span className='flex items-center justify-center rounded-2xl text-slate-950 transition'>
 					<Plus size={18} />
 				</span>
-				<span className='flex items-center gap-2'>
-					<Leaf size={18} />
-					Добавить растение
-				</span>
+				<span className='flex items-center gap-2'>Добавить растение</span>
 			</Button>
 
 			<Modal
@@ -96,6 +101,17 @@ export function CreatePlantForm() {
 					/>
 
 					<Field
+						id='location'
+						label='Локация'
+						placeholder='Например, кухня, окно в спальне'
+						type='text'
+						extra='mb-4'
+						{...register('location', {
+							setValueAs: nullableString
+						})}
+					/>
+
+					<Field
 						id='wateringIntervalDays'
 						label='Базовый интервал полива'
 						placeholder='Например, 7 дней'
@@ -104,6 +120,55 @@ export function CreatePlantForm() {
 						extra='mb-6'
 						isNumber
 						{...register('wateringIntervalDays', {
+							setValueAs: nullableNumber
+						})}
+					/>
+
+					<Field
+						id='wateringIntervalSpringDays'
+						label='Весенний интервал полива'
+						placeholder='Например, 7 дней'
+						type='number'
+						min={1}
+						extra='mb-4'
+						isNumber
+						{...register('wateringIntervalSpringDays', {
+							setValueAs: nullableNumber
+						})}
+					/>
+					<Field
+						id='wateringIntervalSummerDays'
+						label='Летний интервал полива'
+						placeholder='Например, 7 дней'
+						type='number'
+						min={1}
+						extra='mb-4'
+						isNumber
+						{...register('wateringIntervalSummerDays', {
+							setValueAs: nullableNumber
+						})}
+					/>
+					<Field
+						id='wateringIntervalAutumnDays'
+						label='Осенний интервал полива'
+						placeholder='Например, 12 дней'
+						type='number'
+						min={1}
+						extra='mb-4'
+						isNumber
+						{...register('wateringIntervalAutumnDays', {
+							setValueAs: nullableNumber
+						})}
+					/>
+					<Field
+						id='wateringIntervalWinterDays'
+						label='Зимний интервал полива'
+						placeholder='Например, 18 дней'
+						type='number'
+						min={1}
+						extra='mb-6'
+						isNumber
+						{...register('wateringIntervalWinterDays', {
 							setValueAs: nullableNumber
 						})}
 					/>

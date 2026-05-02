@@ -1,4 +1,4 @@
-import { Flower2, Leaf, Trash } from 'lucide-react'
+import { Flower2, Leaf, MapPin, Trash } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
@@ -25,7 +25,7 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 				}
 			}}
 		>
-			<div className='relative h-65 w-full overflow-hidden rounded-t-2xl'>
+			<div className='relative h-100 w-full overflow-hidden rounded-t-2xl'>
 				{/* <Image
 					src='https://avatars.mds.yandex.net/i?id=e946039d12458a4dacf63522da29f18e_sr-12509309-images-thumbs&n=13'
 					alt='Plant photo'
@@ -48,11 +48,6 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 						<Flower2 size={86} />
 					</div>
 				)}
-				<div className='absolute left-4 top-4 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-[#07110d]/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-emerald-100/70 backdrop-blur-xl'>
-					<Leaf size={16} />
-					Мое растение
-					{/* </div> */}
-				</div>
 			</div>
 			<div className='p-5'>
 				<div className='mb-6 flex items-start justify-between gap-4'>
@@ -64,6 +59,12 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 						<h3 className='text-[16px]  text-white '>
 							{plant.nickname || plant.plantName}
 						</h3>
+						{plant.location ? (
+							<p className='mt-2 flex items-center gap-1.5 text-xs text-white/55'>
+								<MapPin size={14} />
+								{plant.location}
+							</p>
+						) : null}
 						{/* <p className='mt-2 text-[10px] text-white/55'>
 							Добавлено {dateFormatter.format(new Date(plant.createdAt))}
 						</p> */}

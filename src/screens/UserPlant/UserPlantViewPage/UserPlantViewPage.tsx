@@ -1,26 +1,34 @@
 'use client'
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
 	ArrowLeft,
 	CalendarDays,
+	Copy,
 	Droplets,
 	Flower2,
 	Leaf,
+	MapPin,
 	Sprout,
 	Timer
 } from 'lucide-react'
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { toast } from 'sonner'
 
 import { Button } from '@/src/components/ui/buttons/Button'
 import { Field } from '@/src/components/ui/fields/Field'
+import { Modal } from '@/src/components/ui/modal/Modal'
+import { DASHBOARD_PAGES } from '@/src/config/pages-url.config'
 import {
 	useGetUserPlantsById,
 	useUpdateUserPlant
 } from '@/src/hooks/userPlants'
+import { userPlantService } from '@/src/services/userPlant.service'
 import type {
+	CreateUserPlant,
 	GetUserPlantById,
 	UpdateUserPlant
 } from '@/src/types/plants.types'
@@ -69,12 +77,13 @@ function getPlantFormValues(plant?: GetUserPlantById | null): UpdateUserPlant {
 	return {
 		...plant,
 		photoUrl: plant.photoUrl ?? '',
+		location: plant.location ?? '',
 		fertilizingIntervalDays: plant.fertilizingIntervalDays ?? undefined,
 		wateringIntervalDays: plant.wateringIntervalDays ?? undefined,
-		wateringIntervalSummerDays:
-			plant.wateringIntervalSummerDays ?? undefined,
-		wateringIntervalWinterDays:
-			plant.wateringIntervalWinterDays ?? undefined,
+		wateringIntervalSpringDays: plant.wateringIntervalSpringDays ?? undefined,
+		wateringIntervalSummerDays: plant.wateringIntervalSummerDays ?? undefined,
+		wateringIntervalAutumnDays: plant.wateringIntervalAutumnDays ?? undefined,
+		wateringIntervalWinterDays: plant.wateringIntervalWinterDays ?? undefined,
 		potSize: plant.potSize ?? '',
 		potType: plant.potType ?? '',
 		soilType: plant.soilType ?? '',
@@ -84,6 +93,51 @@ function getPlantFormValues(plant?: GetUserPlantById | null): UpdateUserPlant {
 		nextRepottingAt: toDateInputValue(plant.nextRepottingAt),
 		lastWateredAt: toDateInputValue(plant.lastWateredAt),
 		nextWateringAt: toDateInputValue(plant.nextWateringAt)
+	}
+}
+
+type DuplicatePlantForm = Pick<CreateUserPlant, 'photoUrl' | 'location'>
+
+function getDuplicatePlantValues(
+	plant?: GetUserPlantById | null
+): DuplicatePlantForm {
+	return {
+		photoUrl: plant?.photoUrl ?? '',
+		location: plant?.location ?? ''
+	}
+}
+
+function getDuplicatePlantPayload(
+	plant: GetUserPlantById,
+	formValues: DuplicatePlantForm
+): CreateUserPlant {
+	return {
+		plantName: plant.plantName,
+		nickname: plant.nickname,
+		location: nullableString(formValues.location),
+		photoUrl: nullableString(formValues.photoUrl),
+		plantTypeId: plant.plantTypeId,
+		lightLevel: plant.lightLevel,
+		temperatureMin: plant.temperatureMin,
+		temperatureMax: plant.temperatureMax,
+		humidityMin: plant.humidityMin,
+		humidityMax: plant.humidityMax,
+		potType: plant.potType,
+		potSize: plant.potSize,
+		soilType: plant.soilType,
+		lastRepottedAt: null,
+		nextRepottingAt: null,
+		lastWateredAt: null,
+		nextWateringAt: null,
+		wateringIntervalDays: plant.wateringIntervalDays,
+		wateringIntervalSpringDays: plant.wateringIntervalSpringDays,
+		wateringIntervalSummerDays: plant.wateringIntervalSummerDays,
+		wateringIntervalAutumnDays: plant.wateringIntervalAutumnDays,
+		wateringIntervalWinterDays: plant.wateringIntervalWinterDays,
+		wateringAmountMl: plant.wateringAmountMl,
+		fertilizingIntervalDays: plant.fertilizingIntervalDays,
+		lastFertilizedAt: null,
+		nextFertilizingAt: null
 	}
 }
 
@@ -98,7 +152,9 @@ function nullableNumber(value?: string | number | null) {
 type WateringIntervalFields = Pick<
 	UpdateUserPlant,
 	| 'wateringIntervalDays'
+	| 'wateringIntervalSpringDays'
 	| 'wateringIntervalSummerDays'
+	| 'wateringIntervalAutumnDays'
 	| 'wateringIntervalWinterDays'
 >
 
@@ -108,20 +164,42 @@ function getPositiveNumber(value?: string | number | null) {
 	return numberValue && numberValue > 0 ? numberValue : null
 }
 
+function getSeasonByDate(date: Date) {
+	const month = date.getUTCMonth()
+
+	if (month >= 2 && month <= 4) return 'spring'
+	if (month >= 5 && month <= 7) return 'summer'
+	if (month >= 8 && month <= 10) return 'autumn'
+
+	return 'winter'
+}
+
 function getSeasonalWateringIntervalDays(
 	date: Date,
 	intervals: WateringIntervalFields
 ) {
-	const month = date.getUTCMonth()
+	const season = getSeasonByDate(date)
 	const baseInterval = getPositiveNumber(intervals.wateringIntervalDays)
 
-	if (month >= 5 && month <= 7) {
+	if (season === 'spring') {
+		return (
+			getPositiveNumber(intervals.wateringIntervalSpringDays) ?? baseInterval
+		)
+	}
+
+	if (season === 'summer') {
 		return (
 			getPositiveNumber(intervals.wateringIntervalSummerDays) ?? baseInterval
 		)
 	}
 
-	if (month === 11 || month <= 1) {
+	if (season === 'autumn') {
+		return (
+			getPositiveNumber(intervals.wateringIntervalAutumnDays) ?? baseInterval
+		)
+	}
+
+	if (season === 'winter') {
 		return (
 			getPositiveNumber(intervals.wateringIntervalWinterDays) ?? baseInterval
 		)
@@ -164,6 +242,33 @@ function formatWateringInterval(plant: GetUserPlantById) {
 	const intervalDays = getSeasonalWateringIntervalDays(new Date(), plant)
 
 	return intervalDays ? `${intervalDays} дн.` : 'Не указано'
+}
+
+function formatIntervalDays(value?: number | string | null) {
+	const intervalDays = getPositiveNumber(value)
+
+	return intervalDays ? `${intervalDays} дн.` : 'Не указано'
+}
+
+function getWateringSeasonItems(plant: GetUserPlantById) {
+	return [
+		{
+			label: 'Весна',
+			value: plant.wateringIntervalSpringDays ?? plant.wateringIntervalDays
+		},
+		{
+			label: 'Лето',
+			value: plant.wateringIntervalSummerDays ?? plant.wateringIntervalDays
+		},
+		{
+			label: 'Осень',
+			value: plant.wateringIntervalAutumnDays ?? plant.wateringIntervalDays
+		},
+		{
+			label: 'Зима',
+			value: plant.wateringIntervalWinterDays ?? plant.wateringIntervalDays
+		}
+	]
 }
 
 function getNextWateringDate(
@@ -225,25 +330,55 @@ function PlantViewSkeleton() {
 export function UserPlantViewPage() {
 	const params = useParams()
 	const router = useRouter()
+	const queryClient = useQueryClient()
 	const id = String(params.id)
+	const [isDuplicateOpen, setIsDuplicateOpen] = useState(false)
 
 	const { data, isLoading } = useGetUserPlantsById(id)
 
 	const { register, handleSubmit, reset, setValue, control } =
 		useForm<UpdateUserPlant>()
+	const {
+		register: registerDuplicate,
+		handleSubmit: handleDuplicateSubmit,
+		reset: resetDuplicate
+	} = useForm<DuplicatePlantForm>()
 
 	const mutate = useUpdateUserPlant(id)
+	const duplicateMutation = useMutation({
+		mutationKey: ['duplicatePlant', id],
+		mutationFn: (formValues: DuplicatePlantForm) => {
+			if (!data) {
+				throw new Error('Plant not found')
+			}
+
+			return userPlantService.create(getDuplicatePlantPayload(data, formValues))
+		},
+		onSuccess: newPlant => {
+			toast.success('Растение скопировано')
+			queryClient.invalidateQueries({
+				queryKey: ['userPlants']
+			})
+			setIsDuplicateOpen(false)
+			resetDuplicate(getDuplicatePlantValues(newPlant))
+			router.push(DASHBOARD_PAGES.PLANT(newPlant.id))
+		}
+	})
 	const [
 		lastWateredAt,
 		wateringIntervalDays,
+		wateringIntervalSpringDays,
 		wateringIntervalSummerDays,
+		wateringIntervalAutumnDays,
 		wateringIntervalWinterDays
 	] = useWatch({
 		control,
 		name: [
 			'lastWateredAt',
 			'wateringIntervalDays',
+			'wateringIntervalSpringDays',
 			'wateringIntervalSummerDays',
+			'wateringIntervalAutumnDays',
 			'wateringIntervalWinterDays'
 		]
 	})
@@ -253,9 +388,15 @@ export function UserPlantViewPage() {
 	}, [reset, data])
 
 	useEffect(() => {
+		resetDuplicate(getDuplicatePlantValues(data))
+	}, [resetDuplicate, data])
+
+	useEffect(() => {
 		const nextWateringAt = getNextWateringInputDate(lastWateredAt, {
 			wateringIntervalDays,
+			wateringIntervalSpringDays,
 			wateringIntervalSummerDays,
+			wateringIntervalAutumnDays,
 			wateringIntervalWinterDays
 		})
 
@@ -268,13 +409,31 @@ export function UserPlantViewPage() {
 		lastWateredAt,
 		setValue,
 		wateringIntervalDays,
+		wateringIntervalSpringDays,
 		wateringIntervalSummerDays,
+		wateringIntervalAutumnDays,
 		wateringIntervalWinterDays
 	])
 
 	const handleCancel = () => {
 		reset(getPlantFormValues(data))
 	}
+
+	const openDuplicateModal = () => {
+		resetDuplicate(getDuplicatePlantValues(data))
+		setIsDuplicateOpen(true)
+	}
+
+	const closeDuplicateModal = () => {
+		if (duplicateMutation.isPending) return
+
+		setIsDuplicateOpen(false)
+		resetDuplicate(getDuplicatePlantValues(data))
+	}
+
+	const onDuplicateSubmit = handleDuplicateSubmit(formValues => {
+		duplicateMutation.mutate(formValues)
+	})
 
 	const onSubmit = handleSubmit(data => {
 		const nextWateringAt =
@@ -283,10 +442,17 @@ export function UserPlantViewPage() {
 		mutate.mutateAsync({
 			...data,
 			photoUrl: nullableString(data.photoUrl),
+			location: nullableString(data.location),
 			fertilizingIntervalDays: nullableNumber(data.fertilizingIntervalDays),
 			wateringIntervalDays: nullableNumber(data.wateringIntervalDays),
+			wateringIntervalSpringDays: nullableNumber(
+				data.wateringIntervalSpringDays
+			),
 			wateringIntervalSummerDays: nullableNumber(
 				data.wateringIntervalSummerDays
+			),
+			wateringIntervalAutumnDays: nullableNumber(
+				data.wateringIntervalAutumnDays
 			),
 			wateringIntervalWinterDays: nullableNumber(
 				data.wateringIntervalWinterDays
@@ -362,14 +528,24 @@ export function UserPlantViewPage() {
 							{title}
 						</h1>
 					</div>
-					<button
-						type='button'
-						className='inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/15 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10 sm:w-auto'
-						onClick={() => router.back()}
-					>
-						<ArrowLeft size={18} />
-						Назад
-					</button>
+					<div className='flex flex-col gap-3 sm:flex-row'>
+						<button
+							type='button'
+							className='inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-200/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-50 transition hover:bg-emerald-300/15 sm:w-auto'
+							onClick={openDuplicateModal}
+						>
+							<Copy size={18} />
+							Скопировать
+						</button>
+						<button
+							type='button'
+							className='inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/15 px-5 py-3 text-sm font-medium text-white transition hover:bg-white/10 sm:w-auto'
+							onClick={() => router.back()}
+						>
+							<ArrowLeft size={18} />
+							Назад
+						</button>
+					</div>
 				</div>
 
 				<div className='flex flex-col gap-8'>
@@ -401,6 +577,12 @@ export function UserPlantViewPage() {
 									Вид
 								</p>
 								<p className='text-xl font-semibold text-white'>{subtitle}</p>
+								{data.location ? (
+									<p className='mt-3 inline-flex items-center gap-2 text-sm font-medium text-emerald-100/75'>
+										<MapPin size={16} />
+										{data.location}
+									</p>
+								) : null}
 								<p className='mt-3 text-sm leading-6 text-white/55'>
 									Карточка растения из вашей коллекции с датами ухода и
 									ближайшим поливом.
@@ -464,6 +646,25 @@ export function UserPlantViewPage() {
 								</div>
 							</div>
 
+							<div className='mt-4 rounded-[24px] border border-white/10 bg-white/5 p-4'>
+								<p className='text-[11px] uppercase tracking-[0.24em] text-white/45'>
+									Полив по сезонам
+								</p>
+								<div className='mt-4 grid grid-cols-2 gap-3'>
+									{getWateringSeasonItems(data).map(item => (
+										<div
+											key={item.label}
+											className='rounded-2xl border border-white/8 bg-black/10 p-3'
+										>
+											<p className='text-xs text-white/50'>{item.label}</p>
+											<p className='mt-1 text-sm font-semibold text-white'>
+												{formatIntervalDays(item.value)}
+											</p>
+										</div>
+									))}
+								</div>
+							</div>
+
 							<button
 								type='button'
 								onClick={handleWaterNow}
@@ -499,6 +700,14 @@ export function UserPlantViewPage() {
 								})}
 							/>
 							<Field
+								id='location'
+								label='Локация'
+								placeholder='Например, кухня, окно в спальне'
+								type='text'
+								extra='mb-6'
+								{...register('location')}
+							/>
+							<Field
 								id='photoUrl'
 								label='URL фотографии'
 								placeholder='Ссылка на фото растения'
@@ -521,9 +730,8 @@ export function UserPlantViewPage() {
 								id='lightLevel'
 								label='Свет'
 								placeholder='Укажите свет для растения'
-								type='string'
+								type='text'
 								extra='mb-6'
-								isNumber
 								{...register('lightLevel')}
 							/>
 							{/* <Field
@@ -691,6 +899,30 @@ export function UserPlantViewPage() {
 								})}
 							/>
 							<Field
+								id='wateringIntervalSpringDays'
+								label='Весенний интервал полива'
+								placeholder='Например, 7 дней'
+								type='number'
+								min={1}
+								extra='mb-6'
+								isNumber
+								{...register('wateringIntervalSpringDays', {
+									setValueAs: nullableNumber
+								})}
+							/>
+							<Field
+								id='wateringIntervalAutumnDays'
+								label='Осенний интервал полива'
+								placeholder='Например, 12 дней'
+								type='number'
+								min={1}
+								extra='mb-6'
+								isNumber
+								{...register('wateringIntervalAutumnDays', {
+									setValueAs: nullableNumber
+								})}
+							/>
+							<Field
 								id='wateringIntervalWinterDays'
 								label='Зимний интервал полива'
 								placeholder='Например, 10 дней'
@@ -730,6 +962,52 @@ export function UserPlantViewPage() {
 					</div>
 				</div>
 			</section>
+			<Modal
+				isOpen={isDuplicateOpen}
+				onClose={closeDuplicateModal}
+				title='Скопировать растение'
+				titleId='duplicate-plant-title'
+				eyebrow='Duplicate Plant'
+				description='Будет создано новое растение с такими же параметрами ухода. Здесь можно изменить только фото и место.'
+				closeLabel='Закрыть окно'
+				closeOnOverlayClick={!duplicateMutation.isPending}
+			>
+				<form onSubmit={onDuplicateSubmit}>
+					<Field
+						id='duplicatePhotoUrl'
+						label='URL фотографии'
+						placeholder='Ссылка на фото нового растения'
+						type='text'
+						extra='mb-4'
+						{...registerDuplicate('photoUrl')}
+					/>
+					<Field
+						id='duplicateLocation'
+						label='Локация'
+						placeholder='Например, кухня, окно в спальне'
+						type='text'
+						extra='mb-6'
+						{...registerDuplicate('location')}
+					/>
+					<div className='flex flex-col-reverse gap-3 sm:flex-row sm:justify-end'>
+						<Button
+							type='button'
+							className='rounded-2xl border border-white/10 bg-black/15 px-5 py-3 text-white hover:bg-white/10'
+							onClick={closeDuplicateModal}
+							disabled={duplicateMutation.isPending}
+						>
+							Отмена
+						</Button>
+						<Button
+							type='submit'
+							disabled={duplicateMutation.isPending}
+							className='rounded-2xl border-0 bg-gradient-to-r from-emerald-300 via-emerald-400 to-lime-300 px-5 py-3 font-semibold text-slate-950 shadow-[0_18px_36px_rgba(72,187,120,0.28)] hover:from-emerald-200 hover:via-emerald-300 hover:to-lime-200 disabled:cursor-not-allowed disabled:opacity-70'
+						>
+							{duplicateMutation.isPending ? 'Создаем...' : 'Создать копию'}
+						</Button>
+					</div>
+				</form>
+			</Modal>
 		</div>
 	)
 }
