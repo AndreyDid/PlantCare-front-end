@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
 import { NO_INDEX_PAGE } from '@/src/constants/seo.constants'
-import { HomePage } from '@/src/screens/Home/HomePage'
+import { DashboardPage } from '@/src/screens/Dashboard/DashboardPage'
 
 export const metadata: Metadata = {
-	title: 'Home',
+	title: 'My Plants',
 	...NO_INDEX_PAGE
 }
 
-export default function Page() {
-	return <HomePage />
+export default function PlantsPage() {
+	return <DashboardPage />
 }

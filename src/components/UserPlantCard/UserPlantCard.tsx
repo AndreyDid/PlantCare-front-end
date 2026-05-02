@@ -1,4 +1,4 @@
-import { Flower2, Leaf, MapPin, Trash } from 'lucide-react'
+import { Flower2, MapPin, Trash } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
