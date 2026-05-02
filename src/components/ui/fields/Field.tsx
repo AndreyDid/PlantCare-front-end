@@ -1,14 +1,12 @@
-import { forwardRef } from 'react'
+import { forwardRef, InputHTMLAttributes } from 'react'
 
-interface InputFieldProps {
+interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 	id: string
 	label: string
 	extra?: string
 	placeholder: string
 	variant?: string
 	state?: 'error' | 'success'
-	disabled?: boolean
-	type?: string
 	isNumber?: boolean
 }
 

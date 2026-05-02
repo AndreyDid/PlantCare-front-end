@@ -1,4 +1,4 @@
-import { Trash } from 'lucide-react'
+import { Flower2, Leaf, Trash } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
@@ -26,13 +26,33 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 			}}
 		>
 			<div className='relative h-65 w-full overflow-hidden rounded-t-2xl'>
-				<Image
+				{/* <Image
 					src='https://avatars.mds.yandex.net/i?id=e946039d12458a4dacf63522da29f18e_sr-12509309-images-thumbs&n=13'
 					alt='Plant photo'
 					fill
 					sizes='(max-width: 640px) 100vw, 320px'
 					className='object-cover'
-				/>
+				/> */}
+				{/* <div className='relative min-h-[320px] overflow-hidden rounded-[28px] border border-white/10 bg-black/15 shadow-[0_16px_46px_rgba(0,0,0,0.22)] sm:min-h-[460px]'> */}
+				{plant.photoUrl ? (
+					<Image
+						src={plant.photoUrl}
+						alt={plant.plantName}
+						fill
+						unoptimized
+						sizes='(max-width: 1024px) 100vw, 720px'
+						className='object-cover'
+					/>
+				) : (
+					<div className='flex h-full min-h-[320px] items-center justify-center bg-[linear-gradient(135deg,rgba(142,229,143,0.18),rgba(255,255,255,0.05))] text-emerald-100 sm:min-h-[460px]'>
+						<Flower2 size={86} />
+					</div>
+				)}
+				<div className='absolute left-4 top-4 inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-[#07110d]/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.22em] text-emerald-100/70 backdrop-blur-xl'>
+					<Leaf size={16} />
+					Мое растение
+					{/* </div> */}
+				</div>
 			</div>
 			<div className='p-5'>
 				<div className='mb-6 flex items-start justify-between gap-4'>

@@ -13,6 +13,14 @@ import { Button } from './ui/buttons/Button'
 import { Field } from './ui/fields/Field'
 import { Modal } from './ui/modal/Modal'
 
+function nullableNumber(value?: string | number | null) {
+	if (value === '' || value === null || value === undefined) return null
+
+	const numberValue = Number(value)
+
+	return Number.isFinite(numberValue) ? numberValue : null
+}
+
 export function CreatePlantForm() {
 	const [isOpen, setIsOpen] = useState(false)
 	const { register, handleSubmit, reset } = useForm<PlantForm>()
@@ -81,9 +89,22 @@ export function CreatePlantForm() {
 						label='Домашнее имя'
 						placeholder='Например, Зелёный сосед'
 						type='text'
-						extra='mb-6'
+						extra='mb-4'
 						{...register('nickname', {
 							required: 'Поле обязательно для заполнения'
+						})}
+					/>
+
+					<Field
+						id='wateringIntervalDays'
+						label='Базовый интервал полива'
+						placeholder='Например, 7 дней'
+						type='number'
+						min={1}
+						extra='mb-6'
+						isNumber
+						{...register('wateringIntervalDays', {
+							setValueAs: nullableNumber
 						})}
 					/>
 
