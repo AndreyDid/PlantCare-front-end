@@ -1,5 +1,6 @@
 import { CreatePlantForm } from '@/src/components/CreatePlantForm'
 import { UserPlantsList } from '@/src/components/UserPlantsList/UserPlantsList'
+import { WaterAllPlantsButton } from '@/src/components/WaterAllPlantsButton'
 
 export function DashboardPage() {
 	return (
@@ -26,7 +27,10 @@ export function DashboardPage() {
 									отдельное модальное окно поверх всего приложения.
 								</p>
 							</div>
-							<CreatePlantForm />
+							<div className='flex flex-col gap-3 sm:flex-row'>
+								<WaterAllPlantsButton />
+								<CreatePlantForm />
+							</div>
 						</div>
 
 						<UserPlantsList />

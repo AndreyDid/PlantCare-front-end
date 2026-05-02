@@ -30,6 +30,18 @@ export function useUpdateUserPlant(id: string) {
 	})
 }
 
+export function useWaterAllUserPlants() {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: () => userPlantService.waterAll(),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ['userPlants']
+			})
+		}
+	})
+}
+
 export function useDeleteUserPlant(id: string) {
 	const queryClient = useQueryClient()
 	return useMutation({

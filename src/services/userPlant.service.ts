@@ -43,6 +43,14 @@ class UserPlantService {
 		return response.data
 	}
 
+	async waterAll() {
+		const response = await axiosWithAuth.post<GetPlant[]>(
+			`${this.BASE_URL}/water-all`
+		)
+
+		return response.data
+	}
+
 	async delete(id: string) {
 		const response = await axiosWithAuth.delete(`${this.BASE_URL}/${id}`)
 
