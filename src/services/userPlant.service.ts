@@ -1,4 +1,9 @@
-import { GetPlant, PlantForm } from '../types/plants.types'
+import {
+	GetPlant,
+	GetUserPlantById,
+	PlantForm,
+	UpdateUserPlant
+} from '../types/plants.types'
 
 import { axiosWithAuth } from '@/src/api/interceptors'
 
@@ -12,7 +17,9 @@ class UserPlantService {
 	}
 
 	async getById(id: string) {
-		const response = await axiosWithAuth.get<GetPlant>(`${this.BASE_URL}/${id}`)
+		const response = await axiosWithAuth.get<GetUserPlantById>(
+			`${this.BASE_URL}/${id}`
+		)
 
 		return response.data
 	}
@@ -22,6 +29,16 @@ class UserPlantService {
 
 		return response.data
 	}
+
+	async update(id: string, data: UpdateUserPlant) {
+		const response = await axiosWithAuth.put<GetUserPlantById>(
+			`${this.BASE_URL}/${id}`,
+			data
+		)
+
+		return response.data
+	}
+
 	async delete(id: string) {
 		const response = await axiosWithAuth.delete(`${this.BASE_URL}/${id}`)
 
