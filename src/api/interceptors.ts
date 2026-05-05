@@ -8,8 +8,12 @@ import { authService } from '../services/auth.service'
 
 import { errorCatch } from './error'
 
+const API_URL = (
+	process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4200/api'
+).replace(/\/$/, '')
+
 const options: CreateAxiosDefaults = {
-	baseURL: 'http://localhost:4200/api',
+	baseURL: API_URL,
 	headers: {
 		'Content-Type': 'application/json'
 	},
