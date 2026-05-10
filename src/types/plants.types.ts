@@ -2,6 +2,7 @@ export interface PlantForm {
 	plantName: string
 	nickname: string
 	location?: string | null
+	photoUrl?: string | null
 	wateringIntervalDays?: number | null
 	wateringIntervalSpringDays?: number | null
 	wateringIntervalSummerDays?: number | null

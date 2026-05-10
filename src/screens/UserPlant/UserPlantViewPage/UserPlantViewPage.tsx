@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import Image from 'next/image'
 import { useParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -333,6 +333,11 @@ export function UserPlantViewPage() {
 	const queryClient = useQueryClient()
 	const id = String(params.id)
 	const [isDuplicateOpen, setIsDuplicateOpen] = useState(false)
+	const [photoFile, setPhotoFile] = useState<File | null>(null)
+	const photoPreviewUrl = useMemo(
+		() => (photoFile ? URL.createObjectURL(photoFile) : null),
+		[photoFile]
+	)
 
 	const { data, isLoading } = useGetUserPlantsById(id)
 
@@ -388,6 +393,12 @@ export function UserPlantViewPage() {
 	}, [reset, data])
 
 	useEffect(() => {
+		return () => {
+			if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl)
+		}
+	}, [photoPreviewUrl])
+
+	useEffect(() => {
 		resetDuplicate(getDuplicatePlantValues(data))
 	}, [resetDuplicate, data])
 
@@ -416,6 +427,7 @@ export function UserPlantViewPage() {
 	])
 
 	const handleCancel = () => {
+		setPhotoFile(null)
 		reset(getPlantFormValues(data))
 	}
 
@@ -435,13 +447,16 @@ export function UserPlantViewPage() {
 		duplicateMutation.mutate(formValues)
 	})
 
-	const onSubmit = handleSubmit(data => {
+	const onSubmit = handleSubmit(async data => {
 		const nextWateringAt =
 			getNextWateringInputDate(data.lastWateredAt, data) || data.nextWateringAt
+		const photoUrl = photoFile
+			? await userPlantService.uploadPhoto(photoFile)
+			: data.photoUrl
 
-		mutate.mutateAsync({
+		const updatedPlant = await mutate.mutateAsync({
 			...data,
-			photoUrl: nullableString(data.photoUrl),
+			photoUrl: nullableString(photoUrl),
 			location: nullableString(data.location),
 			fertilizingIntervalDays: nullableNumber(data.fertilizingIntervalDays),
 			wateringIntervalDays: nullableNumber(data.wateringIntervalDays),
@@ -467,6 +482,8 @@ export function UserPlantViewPage() {
 			lastWateredAt: toIsoDate(data.lastWateredAt),
 			nextWateringAt: toIsoDate(nextWateringAt)
 		})
+		setPhotoFile(null)
+		reset(getPlantFormValues(updatedPlant))
 	})
 
 	const handleWaterNow = async () => {
@@ -551,7 +568,13 @@ export function UserPlantViewPage() {
 				<div className='flex flex-col gap-8'>
 					<div className='grid gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.75fr)]'>
 						<div className='relative min-h-[320px] overflow-hidden rounded-[28px] border border-white/10 bg-black/15 shadow-[0_16px_46px_rgba(0,0,0,0.22)] sm:min-h-[460px]'>
-							{data.photoUrl ? (
+							{photoPreviewUrl ? (
+								<div
+									aria-hidden='true'
+									className='h-full min-h-[320px] bg-cover bg-center sm:min-h-[460px]'
+									style={{ backgroundImage: `url(${photoPreviewUrl})` }}
+								/>
+							) : data.photoUrl ? (
 								<Image
 									src={data.photoUrl}
 									alt={title}
@@ -707,6 +730,24 @@ export function UserPlantViewPage() {
 								extra='mb-6'
 								{...register('location')}
 							/>
+							<div className='mb-6'>
+								<label
+									htmlFor='plantPhoto'
+									className='ml-1.5 text-sm font-medium tracking-[0.02em] text-white/72'
+								>
+									Фото растения
+								</label>
+								<input
+									id='plantPhoto'
+									type='file'
+									accept='image/*'
+									capture='environment'
+									className='mt-2 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3.5 text-base text-white outline-none transition duration-200 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-300 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-slate-950 hover:file:bg-emerald-200 focus:border-emerald-300/70 focus:bg-white/8'
+									onChange={event => {
+										setPhotoFile(event.target.files?.[0] ?? null)
+									}}
+								/>
+							</div>
 							<Field
 								id='photoUrl'
 								label='URL фотографии'
