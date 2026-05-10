@@ -28,6 +28,11 @@ export interface GetPlant {
 	updatedAt: string
 }
 
+export interface WateringOverview {
+	dueToday: GetPlant[]
+	dueTomorrow: GetPlant[]
+}
+
 export interface GetUserPlantById {
 	id: string
 	nickname: string
