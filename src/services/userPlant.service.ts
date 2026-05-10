@@ -9,6 +9,18 @@ import {
 
 import { axiosWithAuth } from '@/src/api/interceptors'
 
+function getAbsoluteUploadUrl(fileUrl: string) {
+	if (/^https?:\/\//.test(fileUrl)) return fileUrl
+
+	const baseUrl = axiosWithAuth.defaults.baseURL ?? ''
+	const origin =
+		typeof window === 'undefined'
+			? baseUrl.replace(/\/api\/?$/, '')
+			: new URL(baseUrl, window.location.origin).origin
+
+	return `${origin}${fileUrl}`
+}
+
 class UserPlantService {
 	private BASE_URL = '/user/plants'
 
@@ -41,6 +53,23 @@ class UserPlantService {
 		)
 
 		return response.data
+	}
+
+	async uploadPhoto(file: File) {
+		const formData = new FormData()
+		formData.append('file', file)
+
+		const response = await axiosWithAuth.post<{ url: string }>(
+			`${this.BASE_URL}/upload-photo`,
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				}
+			}
+		)
+
+		return getAbsoluteUploadUrl(response.data.url)
 	}
 
 	async update(id: string, data: UpdateUserPlant) {

@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -31,17 +31,38 @@ function nullableString(value?: string | number | null) {
 
 export function CreatePlantForm() {
 	const [isOpen, setIsOpen] = useState(false)
+	const [photoFile, setPhotoFile] = useState<File | null>(null)
+	const photoPreviewUrl = useMemo(
+		() => (photoFile ? URL.createObjectURL(photoFile) : null),
+		[photoFile]
+	)
 	const { register, handleSubmit, reset } = useForm<PlantForm>()
 	const queryClient = useQueryClient()
 
 	const closeModal = () => {
 		setIsOpen(false)
+		setPhotoFile(null)
 		reset()
 	}
 
+	useEffect(() => {
+		return () => {
+			if (photoPreviewUrl) URL.revokeObjectURL(photoPreviewUrl)
+		}
+	}, [photoPreviewUrl])
+
 	const { mutate, isPending } = useMutation({
 		mutationKey: ['createPlant'],
-		mutationFn: (data: PlantForm) => userPlantService.create(data),
+		mutationFn: async (data: PlantForm) => {
+			const photoUrl = photoFile
+				? await userPlantService.uploadPhoto(photoFile)
+				: data.photoUrl
+
+			return userPlantService.create({
+				...data,
+				photoUrl: nullableString(photoUrl)
+			})
+		},
 		onSuccess() {
 			toast.success('Растение успешно добавлено!')
 			queryClient.invalidateQueries({
@@ -110,6 +131,32 @@ export function CreatePlantForm() {
 							setValueAs: nullableString
 						})}
 					/>
+
+					<div className='mb-4'>
+						<label
+							htmlFor='plantPhoto'
+							className='ml-1.5 text-sm font-medium tracking-[0.02em] text-white/72'
+						>
+							Фото растения
+						</label>
+						<input
+							id='plantPhoto'
+							type='file'
+							accept='image/*'
+							capture='environment'
+							className='mt-2 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3.5 text-base text-white outline-none transition duration-200 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-300 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-slate-950 hover:file:bg-emerald-200 focus:border-emerald-300/70 focus:bg-white/8'
+							onChange={event => {
+								setPhotoFile(event.target.files?.[0] ?? null)
+							}}
+						/>
+						{photoPreviewUrl ? (
+							<div
+								aria-hidden='true'
+								className='mt-3 h-36 w-full rounded-2xl bg-cover bg-center'
+								style={{ backgroundImage: `url(${photoPreviewUrl})` }}
+							/>
+						) : null}
+					</div>
 
 					<Field
 						id='wateringIntervalDays'
