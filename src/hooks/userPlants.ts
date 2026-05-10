@@ -18,14 +18,27 @@ export function useGetUserPlantsById(id: string) {
 	})
 }
 
+export function useWateringOverview() {
+	return useQuery({
+		queryKey: ['userPlants', 'wateringOverview'],
+		queryFn: () => userPlantService.getWateringOverview()
+	})
+}
+
+function invalidateUserPlantQueries(
+	queryClient: ReturnType<typeof useQueryClient>
+) {
+	queryClient.invalidateQueries({
+		queryKey: ['userPlants']
+	})
+}
+
 export function useUpdateUserPlant(id: string) {
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (data: UpdateUserPlant) => userPlantService.update(id, data),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['userPlants']
-			})
+			invalidateUserPlantQueries(queryClient)
 		}
 	})
 }
@@ -35,9 +48,27 @@ export function useWaterAllUserPlants() {
 	return useMutation({
 		mutationFn: () => userPlantService.waterAll(),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['userPlants']
-			})
+			invalidateUserPlantQueries(queryClient)
+		}
+	})
+}
+
+export function useWaterDueTodayUserPlants() {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: () => userPlantService.waterDueToday(),
+		onSuccess: () => {
+			invalidateUserPlantQueries(queryClient)
+		}
+	})
+}
+
+export function useWaterSelectedUserPlants() {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (plantIds: string[]) => userPlantService.waterSelected(plantIds),
+		onSuccess: () => {
+			invalidateUserPlantQueries(queryClient)
 		}
 	})
 }
@@ -47,9 +78,7 @@ export function useDeleteUserPlant(id: string) {
 	return useMutation({
 		mutationFn: () => userPlantService.delete(id),
 		onSuccess: () => {
-			queryClient.invalidateQueries({
-				queryKey: ['userPlants']
-			})
+			invalidateUserPlantQueries(queryClient)
 		}
 	})
 }
