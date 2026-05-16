@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userPlantService } from '../services/userPlant.service'
-import { UpdateUserPlant } from '../types/plants.types'
+import { CreatePlantCareEvent, UpdateUserPlant } from '../types/plants.types'
 
 export function useUserPlants() {
 	const { data, isLoading } = useQuery({
@@ -25,6 +25,13 @@ export function useWateringOverview() {
 	})
 }
 
+export function usePlantCareEvents(id: string) {
+	return useQuery({
+		queryKey: ['userPlants', id, 'careEvents'],
+		queryFn: () => userPlantService.getCareEvents(id)
+	})
+}
+
 function invalidateUserPlantQueries(
 	queryClient: ReturnType<typeof useQueryClient>
 ) {
@@ -37,6 +44,27 @@ export function useUpdateUserPlant(id: string) {
 	const queryClient = useQueryClient()
 	return useMutation({
 		mutationFn: (data: UpdateUserPlant) => userPlantService.update(id, data),
+		onSuccess: () => {
+			invalidateUserPlantQueries(queryClient)
+		}
+	})
+}
+
+export function useCreatePlantCareEvent(id: string) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (data: CreatePlantCareEvent) =>
+			userPlantService.createCareEvent(id, data),
+		onSuccess: () => {
+			invalidateUserPlantQueries(queryClient)
+		}
+	})
+}
+
+export function useDeletePlantCareEvent(id: string) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (eventId: string) => userPlantService.deleteCareEvent(id, eventId),
 		onSuccess: () => {
 			invalidateUserPlantQueries(queryClient)
 		}

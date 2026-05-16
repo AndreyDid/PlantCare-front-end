@@ -1,7 +1,9 @@
 import {
+	CreatePlantCareEvent,
 	CreateUserPlant,
 	GetPlant,
 	GetUserPlantById,
+	PlantCareEvent,
 	PlantForm,
 	UpdateUserPlant,
 	WateringOverview
@@ -76,6 +78,31 @@ class UserPlantService {
 		const response = await axiosWithAuth.put<GetUserPlantById>(
 			`${this.BASE_URL}/${id}`,
 			data
+		)
+
+		return response.data
+	}
+
+	async getCareEvents(id: string) {
+		const response = await axiosWithAuth.get<PlantCareEvent[]>(
+			`${this.BASE_URL}/${id}/events`
+		)
+
+		return response.data
+	}
+
+	async createCareEvent(id: string, data: CreatePlantCareEvent) {
+		const response = await axiosWithAuth.post<GetUserPlantById>(
+			`${this.BASE_URL}/${id}/events`,
+			data
+		)
+
+		return response.data
+	}
+
+	async deleteCareEvent(id: string, eventId: string) {
+		const response = await axiosWithAuth.delete<GetUserPlantById>(
+			`${this.BASE_URL}/${id}/events/${eventId}`
 		)
 
 		return response.data

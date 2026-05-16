@@ -34,6 +34,33 @@ export interface WateringOverview {
 	dueTomorrow: GetPlant[]
 }
 
+export type PlantCareEventType =
+	| 'WATERING'
+	| 'FERTILIZING'
+	| 'REPOTTING'
+	| 'OBSERVATION'
+	| 'NOTE'
+
+export interface PlantCareEvent {
+	id: string
+	plantId: string
+	type: PlantCareEventType
+	title: string | null
+	description: string | null
+	eventAt: string
+	amountMl: number | null
+	createdAt: string
+	updatedAt: string
+}
+
+export interface CreatePlantCareEvent {
+	type: PlantCareEventType
+	title?: string | null
+	description?: string | null
+	eventAt?: string | null
+	amountMl?: number | null
+}
+
 export interface GetUserPlantById {
 	id: string
 	nickname: string
@@ -59,6 +86,7 @@ export interface GetUserPlantById {
 	temperatureMax: number | null
 	temperatureMin: number | null
 	wateringAmountMl: number | null
+	wateringNotes: string | null
 
 	lastWateredAt: string | null
 	nextWateringAt: string | null
@@ -67,6 +95,7 @@ export interface GetUserPlantById {
 	wateringIntervalSummerDays: number | null
 	wateringIntervalAutumnDays: number | null
 	wateringIntervalWinterDays: number | null
+	careEvents?: PlantCareEvent[]
 	createdAt: string
 	updatedAt: string
 }
@@ -100,6 +129,7 @@ export type UpdateUserPlant = Partial<
 		| 'temperatureMax'
 		| 'temperatureMin'
 		| 'wateringAmountMl'
+		| 'wateringNotes'
 	>
 >
 
@@ -132,5 +162,6 @@ export type CreateUserPlant = Partial<
 		| 'temperatureMax'
 		| 'temperatureMin'
 		| 'wateringAmountMl'
+		| 'wateringNotes'
 	>
 >
