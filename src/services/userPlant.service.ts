@@ -10,7 +10,8 @@ import {
 	PlantForm,
 	SuggestPlantCareRequest,
 	UpdateUserPlant,
-	WateringOverview
+	WateringOverview,
+	WeatherWateringOverview
 } from '../types/plants.types'
 
 import { axiosWithAuth } from '@/src/api/interceptors'
@@ -47,6 +48,14 @@ class UserPlantService {
 	async getWateringOverview() {
 		const response = await axiosWithAuth.get<WateringOverview>(
 			`${this.BASE_URL}/watering-overview`
+		)
+
+		return response.data
+	}
+
+	async getWeatherWateringOverview() {
+		const response = await axiosWithAuth.get<WeatherWateringOverview>(
+			`${this.BASE_URL}/weather-watering-overview`
 		)
 
 		return response.data

@@ -25,6 +25,13 @@ export function useWateringOverview() {
 	})
 }
 
+export function useWeatherWateringOverview() {
+	return useQuery({
+		queryKey: ['userPlants', 'weatherWateringOverview'],
+		queryFn: () => userPlantService.getWeatherWateringOverview()
+	})
+}
+
 export function usePlantCareEvents(id: string) {
 	return useQuery({
 		queryKey: ['userPlants', id, 'careEvents'],
@@ -64,7 +71,8 @@ export function useCreatePlantCareEvent(id: string) {
 export function useDeletePlantCareEvent(id: string) {
 	const queryClient = useQueryClient()
 	return useMutation({
-		mutationFn: (eventId: string) => userPlantService.deleteCareEvent(id, eventId),
+		mutationFn: (eventId: string) =>
+			userPlantService.deleteCareEvent(id, eventId),
 		onSuccess: () => {
 			invalidateUserPlantQueries(queryClient)
 		}
@@ -94,7 +102,8 @@ export function useWaterDueTodayUserPlants() {
 export function useWaterSelectedUserPlants() {
 	const queryClient = useQueryClient()
 	return useMutation({
-		mutationFn: (plantIds: string[]) => userPlantService.waterSelected(plantIds),
+		mutationFn: (plantIds: string[]) =>
+			userPlantService.waterSelected(plantIds),
 		onSuccess: () => {
 			invalidateUserPlantQueries(queryClient)
 		}

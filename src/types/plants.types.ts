@@ -45,6 +45,43 @@ export interface PlantWeatherSummary {
 	averageVapourPressureDeficitKpa: number | null
 }
 
+export interface CurrentPlantWeatherSummary {
+	city: string
+	resolvedLocation: string
+	observedAt: string | null
+	temperatureC: number | null
+	apparentTemperatureC: number | null
+	humidityPercent: number | null
+	precipitationMm: number | null
+	windSpeedKmh: number | null
+	weatherCode: number | null
+	condition: string
+	today: {
+		temperatureMinC: number | null
+		temperatureMaxC: number | null
+		precipitationMm: number | null
+	}
+	tomorrow: {
+		temperatureMinC: number | null
+		temperatureMaxC: number | null
+		precipitationMm: number | null
+	}
+}
+
+export interface WeatherWateringOverview {
+	city: string | null
+	weather: CurrentPlantWeatherSummary | null
+	dueTodayCount: number
+	dueTomorrowCount: number
+	upcomingPlantCount: number
+	advice: {
+		tone: 'normal' | 'attention' | 'caution'
+		title: string
+		text: string
+		details: string[]
+	}
+}
+
 export interface PlantAiSuggestion {
 	plantName: string | null
 	latinName: string | null
