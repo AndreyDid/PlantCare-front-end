@@ -11,6 +11,7 @@ import { userPlantService } from '../services/userPlant.service'
 import { CreateUserPlant, PlantAiSuggestion } from '../types/plants.types'
 
 import { PlantAiSuggestionCard } from './PlantAiSuggestionCard'
+import { PlantWindowDirectionPicker } from './PlantWindowDirectionPicker'
 import { Button } from './ui/buttons/Button'
 import { Field } from './ui/fields/Field'
 import { Modal } from './ui/modal/Modal'
@@ -258,6 +259,18 @@ export function CreatePlantForm() {
 							onChange={event => setAiCity(event.target.value)}
 						/>
 					</div>
+
+					<PlantWindowDirectionPicker
+						directions={profileData?.user.windowDirections}
+						onSelect={values => {
+							setValue('location', values.location, {
+								shouldDirty: true
+							})
+							setValue('lightLevel', values.lightLevel, {
+								shouldDirty: true
+							})
+						}}
+					/>
 
 					<div className='mb-5 rounded-[22px] border border-white/10 bg-white/[0.04] p-4'>
 						<div className='flex flex-col gap-3 sm:flex-row sm:items-end'>

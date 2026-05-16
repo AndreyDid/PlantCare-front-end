@@ -5,12 +5,17 @@ export interface AuthForm {
 
 export type WindowDirection = 'north' | 'east' | 'south' | 'west'
 
+export interface WindowPlacement {
+	direction: WindowDirection
+	label: string
+}
+
 export interface User {
 	id: string
 	name?: string | null
 	email: string
 	city?: string | null
-	windowDirections?: WindowDirection[]
+	windowDirections?: string[]
 	plants?: []
 }
 

@@ -3,6 +3,7 @@ import type { FormEventHandler } from 'react'
 import type { UseFormRegister } from 'react-hook-form'
 
 import { PlantAiSuggestionCard } from '@/src/components/PlantAiSuggestionCard'
+import { PlantWindowDirectionPicker } from '@/src/components/PlantWindowDirectionPicker'
 import { Button } from '@/src/components/ui/buttons/Button'
 import { Field } from '@/src/components/ui/fields/Field'
 import { Modal } from '@/src/components/ui/modal/Modal'
@@ -18,10 +19,15 @@ interface PlantEditModalProps {
 	isOpen: boolean
 	isAiSuggestPending: boolean
 	isPending: boolean
+	windowDirections?: string[] | null
 	onAiCityChange: (city: string) => void
 	onAiSuggest: () => void
 	onClose: () => void
 	onPhotoChange: (file: File | null) => void
+	onWindowDirectionSelect: (values: {
+		location: string
+		lightLevel: string
+	}) => void
 	onSubmit: FormEventHandler<HTMLFormElement>
 	register: UseFormRegister<UpdateUserPlant>
 }
@@ -32,10 +38,12 @@ export function PlantEditModal({
 	isOpen,
 	isAiSuggestPending,
 	isPending,
+	windowDirections,
 	onAiCityChange,
 	onAiSuggest,
 	onClose,
 	onPhotoChange,
+	onWindowDirectionSelect,
 	onSubmit,
 	register
 }: PlantEditModalProps) {
@@ -115,6 +123,12 @@ export function PlantEditModal({
 						extra='mb-6'
 						{...register('photoUrl')}
 					/>
+					<div className='sm:col-span-2'>
+						<PlantWindowDirectionPicker
+							directions={windowDirections}
+							onSelect={onWindowDirectionSelect}
+						/>
+					</div>
 					<div className='mb-6 sm:col-span-2'>
 						<label
 							htmlFor='plantPhoto'

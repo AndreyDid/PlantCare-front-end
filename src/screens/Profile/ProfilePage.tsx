@@ -1,7 +1,15 @@
 'use client'
 
 import cn from 'clsx'
-import { Compass, Loader2, MapPin, Save, UserRound } from 'lucide-react'
+import {
+	Compass,
+	Loader2,
+	MapPin,
+	Plus,
+	Save,
+	Trash2,
+	UserRound
+} from 'lucide-react'
 import { useEffect } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -9,39 +17,15 @@ import { toast } from 'sonner'
 import { Button } from '@/src/components/ui/buttons/Button'
 import { Field } from '@/src/components/ui/fields/Field'
 import { useUpdateUserProfile, useUserProfile } from '@/src/hooks/userProfile'
+import {
+	createWindowPlacementEntry,
+	decodeWindowPlacement,
+	encodeWindowPlacement,
+	normalizeWindowPlacementEntries,
+	windowDirectionCareOptions,
+	windowDirections
+} from '@/src/shared/utils/window-direction.utils'
 import type { TypeUserForm, WindowDirection } from '@/src/types/auth.types'
-
-const directionOptions: {
-	value: WindowDirection
-	label: string
-	shortLabel: string
-	description: string
-}[] = [
-	{
-		value: 'north',
-		label: 'Север',
-		shortLabel: 'С',
-		description: 'Мягкий рассеянный свет'
-	},
-	{
-		value: 'east',
-		label: 'Восток',
-		shortLabel: 'В',
-		description: 'Утреннее солнце'
-	},
-	{
-		value: 'south',
-		label: 'Юг',
-		shortLabel: 'Ю',
-		description: 'Самое яркое окно'
-	},
-	{
-		value: 'west',
-		label: 'Запад',
-		shortLabel: 'З',
-		description: 'Солнце после обеда'
-	}
-]
 
 function nullableString(value?: string | null) {
 	if (value === undefined) return undefined
@@ -88,7 +72,7 @@ export function ProfilePage() {
 				windowDirections: []
 			}
 		})
-	const selectedDirections =
+	const windowEntries =
 		useWatch({
 			control,
 			name: 'windowDirections'
@@ -101,19 +85,49 @@ export function ProfilePage() {
 			email: data.user.email,
 			name: data.user.name ?? '',
 			city: data.user.city ?? '',
-			windowDirections: data.user.windowDirections ?? [],
+			windowDirections: normalizeWindowPlacementEntries(
+				data.user.windowDirections
+			),
 			password: ''
 		})
 	}, [data, reset])
 
-	const toggleDirection = (direction: WindowDirection) => {
-		const nextDirections = selectedDirections.includes(direction)
-			? selectedDirections.filter(item => item !== direction)
-			: [...selectedDirections, direction]
+	const updateWindowPlacement = (
+		index: number,
+		nextPlacement: {
+			direction: WindowDirection
+			label: string
+		}
+	) => {
+		const nextEntries = [...windowEntries]
+		nextEntries[index] = encodeWindowPlacement(nextPlacement)
 
-		setValue('windowDirections', nextDirections, {
+		setValue('windowDirections', nextEntries, {
 			shouldDirty: true
 		})
+	}
+
+	const addWindowPlacement = () => {
+		setValue(
+			'windowDirections',
+			[
+				...windowEntries,
+				createWindowPlacementEntry('east', `Новое окно ${windowEntries.length + 1}`)
+			],
+			{
+				shouldDirty: true
+			}
+		)
+	}
+
+	const removeWindowPlacement = (index: number) => {
+		setValue(
+			'windowDirections',
+			windowEntries.filter((_, itemIndex) => itemIndex !== index),
+			{
+				shouldDirty: true
+			}
+		)
 	}
 
 	const onSubmit = handleSubmit(formValues => {
@@ -122,7 +136,9 @@ export function ProfilePage() {
 			email: formValues.email.trim(),
 			name: nullableString(formValues.name),
 			city: nullableString(formValues.city),
-			windowDirections: formValues.windowDirections ?? []
+			windowDirections: normalizeWindowPlacementEntries(
+				formValues.windowDirections
+			)
 		}
 
 		if (password) payload.password = password
@@ -133,7 +149,9 @@ export function ProfilePage() {
 					email: result.user.email,
 					name: result.user.name ?? '',
 					city: result.user.city ?? '',
-					windowDirections: result.user.windowDirections ?? [],
+					windowDirections: normalizeWindowPlacementEntries(
+						result.user.windowDirections
+					),
 					password: ''
 				})
 				toast.success('Профиль обновлён')
@@ -231,48 +249,115 @@ export function ProfilePage() {
 							<div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-300/12 text-emerald-100'>
 								<Compass size={20} />
 							</div>
-							<div>
+							<div className='min-w-0 flex-1'>
 								<h2 className='text-base font-semibold text-white'>
-									Куда выходят окна
+									Окна и их расположение
 								</h2>
 								<p className='mt-1 text-sm leading-6 text-white/55'>
-									Можно выбрать несколько сторон света, если растения стоят в
-									разных комнатах.
+									Добавьте конкретные места: кухня, окно перед балконом,
+									спальня. Потом их можно быстро выбрать в карточке растения.
 								</p>
 							</div>
+							<Button
+								type='button'
+								className='h-10 shrink-0 rounded-xl border-emerald-200/20 bg-emerald-300/10 px-3 text-emerald-50 hover:bg-emerald-300/15'
+								onClick={addWindowPlacement}
+							>
+								<Plus size={16} />
+								Окно
+							</Button>
 						</div>
 
-						<div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-4'>
-							{directionOptions.map(direction => {
-								const isSelected = selectedDirections.includes(direction.value)
+						{windowEntries.length ? (
+							<div className='grid gap-3'>
+								{windowEntries.map((entry, index) => {
+									const placement = decodeWindowPlacement(entry) ?? {
+										direction: 'east' as WindowDirection,
+										label: ''
+									}
+									const option = windowDirectionCareOptions[placement.direction]
 
-								return (
-									<button
-										key={direction.value}
-										type='button'
-										className={cn(
-											'flex min-h-28 flex-col items-start justify-between rounded-3xl border p-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07110d]',
-											isSelected
-												? 'border-emerald-200/40 bg-emerald-300/15 text-white'
-												: 'border-white/10 bg-black/10 text-white/70 hover:bg-white/[0.06] hover:text-white'
-										)}
-										onClick={() => toggleDirection(direction.value)}
-									>
-										<span className='flex h-9 w-9 items-center justify-center rounded-2xl border border-white/10 bg-black/15 text-sm font-semibold text-emerald-100'>
-											{direction.shortLabel}
-										</span>
-										<span>
-											<span className='block font-semibold'>
-												{direction.label}
-											</span>
-											<span className='mt-1 block text-xs leading-5 text-white/48'>
-												{direction.description}
-											</span>
-										</span>
-									</button>
-								)
-							})}
-						</div>
+									return (
+										<div
+											key={`window-placement-${index}`}
+											className='grid gap-3 rounded-2xl border border-white/10 bg-black/10 p-3 sm:grid-cols-[minmax(0,1fr)_minmax(180px,220px)_52px] sm:items-start'
+										>
+											<Field
+												id={`window-label-${index}`}
+												label='Где находится окно'
+												placeholder='Например, кухня или окно перед балконом'
+												type='text'
+												extra='mb-0'
+												value={placement.label}
+												onChange={event =>
+													updateWindowPlacement(index, {
+														...placement,
+														label: event.target.value
+													})
+												}
+											/>
+
+											<div>
+												<label
+													htmlFor={`window-direction-${index}`}
+													className='ml-1.5 text-sm font-medium tracking-[0.02em] text-white/72'
+												>
+													Сторона света
+												</label>
+												<select
+													id={`window-direction-${index}`}
+													value={placement.direction}
+													className='mt-2 h-[52px] w-full rounded-[18px] border border-white/10 bg-[#13231b] px-4 text-base text-white outline-none transition duration-200 focus:border-emerald-300/70 focus:bg-[#172a21]'
+													onChange={event =>
+														updateWindowPlacement(index, {
+															...placement,
+															direction: event.target.value as WindowDirection
+														})
+													}
+												>
+													{windowDirections.map(direction => (
+														<option
+															key={direction}
+															value={direction}
+														>
+															{windowDirectionCareOptions[direction].label}
+														</option>
+													))}
+												</select>
+												<p className='mt-2 text-xs leading-5 text-white/45'>
+													{option.description}
+												</p>
+											</div>
+
+											<Button
+												type='button'
+												aria-label='Удалить окно'
+												className='h-[52px] w-[52px] justify-self-end rounded-[18px] px-0 text-white/55 hover:border-red-200/30 hover:bg-red-400/10 hover:text-red-100 sm:mt-[29px]'
+												onClick={() => removeWindowPlacement(index)}
+											>
+												<Trash2 size={16} />
+											</Button>
+										</div>
+									)
+								})}
+							</div>
+						) : (
+							<button
+								type='button'
+								className={cn(
+									'w-full rounded-2xl border border-dashed border-white/14 bg-black/10 px-4 py-6 text-left transition hover:border-emerald-200/25 hover:bg-emerald-300/10'
+								)}
+								onClick={addWindowPlacement}
+							>
+								<span className='block text-sm font-medium text-white/80'>
+									Добавить первое окно
+								</span>
+								<span className='mt-1 block text-sm leading-6 text-white/50'>
+									Например: “Кухня, восточное окно” или “Окно перед балконом,
+									восточное окно”.
+								</span>
+							</button>
+						)}
 					</div>
 
 					<div className='flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between'>

@@ -437,11 +437,20 @@ export function UserPlantViewPage() {
 				isOpen={isEditOpen}
 				isAiSuggestPending={aiSuggestMutation.isPending}
 				isPending={updatePlantMutation.isPending}
+				windowDirections={profileData?.user.windowDirections}
 				register={register}
 				onAiCityChange={setAiCity}
 				onAiSuggest={() => aiSuggestMutation.mutate()}
 				onClose={closeEditModal}
 				onPhotoChange={setPhotoFile}
+				onWindowDirectionSelect={values => {
+					setValue('location', values.location, {
+						shouldDirty: true
+					})
+					setValue('lightLevel', values.lightLevel, {
+						shouldDirty: true
+					})
+				}}
 				onSubmit={onSubmit}
 			/>
 			<PlantCareAnalysisModal
