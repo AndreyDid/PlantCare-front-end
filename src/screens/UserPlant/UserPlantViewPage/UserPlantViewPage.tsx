@@ -399,14 +399,14 @@ export function UserPlantViewPage() {
 
 	return (
 		<div className='w-full max-w-7xl'>
-			<section className='rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:p-8 '>
+			<section className='rounded-[22px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8'>
 				<PlantProfileHeader
 					title={title}
 					onBack={() => router.back()}
 					onEdit={openEditModal}
 				/>
 
-				<div className='flex flex-col gap-8'>
+				<div className='flex flex-col gap-4 sm:gap-6 lg:gap-8'>
 					<PlantOverview
 						plant={data}
 						title={title}
@@ -416,7 +416,7 @@ export function UserPlantViewPage() {
 						onWaterNow={handleWaterNow}
 					/>
 
-					<div className='grid gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(320px,0.55fr)]'>
+					<div className='grid gap-3 md:grid-cols-[minmax(0,0.85fr)_minmax(280px,0.55fr)] lg:gap-4 lg:grid-cols-[minmax(0,0.85fr)_minmax(320px,0.55fr)]'>
 						<CareHistoryPreview
 							events={careEvents}
 							onOpenHistory={() => setIsHistoryOpen(true)}
