@@ -1,13 +1,15 @@
-import { Copy, Pencil, Plus } from 'lucide-react'
+import { Copy, Pencil, Plus, Sparkles } from 'lucide-react'
 
 interface PlantActionsPanelProps {
 	onAddEvent: () => void
+	onAnalyzeCare: () => void
 	onDuplicate: () => void
 	onEdit: () => void
 }
 
 export function PlantActionsPanel({
 	onAddEvent,
+	onAnalyzeCare,
 	onDuplicate,
 	onEdit
 }: PlantActionsPanelProps) {
@@ -24,6 +26,14 @@ export function PlantActionsPanel({
 				>
 					<Plus size={18} />
 					Добавить событие
+				</button>
+				<button
+					type='button'
+					onClick={onAnalyzeCare}
+					className='inline-flex items-center justify-center gap-3 rounded-[18px] border border-emerald-200/20 bg-emerald-300/10 px-5 py-3 text-sm font-medium text-emerald-50 transition hover:bg-emerald-300/15'
+				>
+					<Sparkles size={18} />
+					Анализ ухода ИИ
 				</button>
 				<button
 					type='button'
@@ -45,4 +55,3 @@ export function PlantActionsPanel({
 		</div>
 	)
 }
-

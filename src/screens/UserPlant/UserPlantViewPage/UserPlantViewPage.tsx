@@ -11,12 +11,12 @@ import { CareHistoryModal } from './components/CareHistoryModal'
 import { CareHistoryPreview } from './components/CareHistoryPreview'
 import { DuplicatePlantModal } from './components/DuplicatePlantModal'
 import { PlantActionsPanel } from './components/PlantActionsPanel'
+import { PlantCareAnalysisModal } from './components/PlantCareAnalysisModal'
 import { PlantEditModal } from './components/PlantEditModal'
 import { PlantNotFound } from './components/PlantNotFound'
 import { PlantOverview } from './components/PlantOverview'
 import { PlantProfileHeader } from './components/PlantProfileHeader'
 import { PlantViewSkeleton } from './components/PlantViewSkeleton'
-
 import { DASHBOARD_PAGES } from '@/src/config/pages-url.config'
 import {
 	useCreatePlantCareEvent,
@@ -24,9 +24,13 @@ import {
 	useGetUserPlantsById,
 	useUpdateUserPlant
 } from '@/src/hooks/userPlants'
+import { useUserProfile } from '@/src/hooks/userProfile'
 import { userPlantService } from '@/src/services/userPlant.service'
 import { toIsoDate } from '@/src/shared/utils/date.utils'
-import { nullableNumber, nullableString } from '@/src/shared/utils/nullable.utils'
+import {
+	nullableNumber,
+	nullableString
+} from '@/src/shared/utils/nullable.utils'
 import {
 	getNextWateringInputDate,
 	sortCareEventsByDate
@@ -44,8 +48,30 @@ import type {
 } from '@/src/shared/utils/user-plant-form.utils'
 import type {
 	CreatePlantCareEvent,
+	PlantAiSuggestion,
+	PlantCareAnalysis,
 	UpdateUserPlant
 } from '@/src/types/plants.types'
+
+const aiSuggestionFields: Array<keyof UpdateUserPlant> = [
+	'plantName',
+	'lightLevel',
+	'temperatureMin',
+	'temperatureMax',
+	'humidityMin',
+	'humidityMax',
+	'potType',
+	'potSize',
+	'soilType',
+	'wateringIntervalDays',
+	'wateringIntervalSpringDays',
+	'wateringIntervalSummerDays',
+	'wateringIntervalAutumnDays',
+	'wateringIntervalWinterDays',
+	'wateringAmountMl',
+	'wateringNotes',
+	'fertilizingIntervalDays'
+]
 
 export function UserPlantViewPage() {
 	const params = useParams()
@@ -56,14 +82,25 @@ export function UserPlantViewPage() {
 	const [isDuplicateOpen, setIsDuplicateOpen] = useState(false)
 	const [isEditOpen, setIsEditOpen] = useState(false)
 	const [isCareEventOpen, setIsCareEventOpen] = useState(false)
+	const [isCareAnalysisOpen, setIsCareAnalysisOpen] = useState(false)
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 	const [photoFile, setPhotoFile] = useState<File | null>(null)
+	const [aiCity, setAiCity] = useState('')
+	const [analysisCity, setAnalysisCity] = useState('')
+	const [analysisQuestion, setAnalysisQuestion] = useState('')
+	const [aiSuggestion, setAiSuggestion] = useState<PlantAiSuggestion | null>(
+		null
+	)
+	const [careAnalysis, setCareAnalysis] = useState<PlantCareAnalysis | null>(
+		null
+	)
 	const photoPreviewUrl = useMemo(
 		() => (photoFile ? URL.createObjectURL(photoFile) : null),
 		[photoFile]
 	)
 
 	const { data, isLoading } = useGetUserPlantsById(id)
+	const { data: profileData } = useUserProfile()
 
 	const { register, handleSubmit, reset, setValue, control } =
 		useForm<UpdateUserPlant>()
@@ -84,6 +121,49 @@ export function UserPlantViewPage() {
 	const updatePlantMutation = useUpdateUserPlant(id)
 	const createCareEventMutation = useCreatePlantCareEvent(id)
 	const deleteCareEventMutation = useDeletePlantCareEvent(id)
+	const aiSuggestMutation = useMutation({
+		mutationKey: ['suggestExistingPlantCare', id],
+		mutationFn: () => {
+			if (!data) throw new Error('Plant not found')
+
+			return userPlantService.suggestExistingCare(id, {
+				city: nullableString(aiCity)
+			})
+		},
+		onSuccess: result => {
+			setAiSuggestion(result)
+			applySuggestedValues(result.suggestion)
+			toast.success('ИИ заполнил черновик ухода')
+		},
+		onError: error => {
+			toast.error(
+				error instanceof Error
+					? error.message
+					: 'Не удалось получить подсказку от ИИ'
+			)
+		}
+	})
+	const careAnalysisMutation = useMutation({
+		mutationKey: ['analyzePlantCare', id],
+		mutationFn: () => {
+			if (!data) throw new Error('Plant not found')
+
+			return userPlantService.analyzeCare(id, {
+				city: nullableString(analysisCity),
+				question: nullableString(analysisQuestion)
+			})
+		},
+		onSuccess: result => {
+			setCareAnalysis(result)
+		},
+		onError: error => {
+			toast.error(
+				error instanceof Error
+					? error.message
+					: 'Не удалось выполнить анализ ухода'
+			)
+		}
+	})
 	const duplicateMutation = useMutation({
 		mutationKey: ['duplicatePlant', id],
 		mutationFn: (formValues: DuplicatePlantForm) => {
@@ -122,6 +202,18 @@ export function UserPlantViewPage() {
 			'wateringIntervalWinterDays'
 		]
 	})
+
+	function applySuggestedValues(suggestion: UpdateUserPlant) {
+		aiSuggestionFields.forEach(field => {
+			const value = suggestion[field]
+
+			if (value !== undefined) {
+				setValue(field, value, {
+					shouldDirty: true
+				})
+			}
+		})
+	}
 
 	useEffect(() => {
 		reset(getPlantFormValues(data))
@@ -167,11 +259,13 @@ export function UserPlantViewPage() {
 
 	const resetEditForm = () => {
 		setPhotoFile(null)
+		setAiSuggestion(null)
 		reset(getPlantFormValues(data))
 	}
 
 	const openEditModal = () => {
 		resetEditForm()
+		setAiCity(currentCity => currentCity || profileData?.user.city || '')
 		setIsEditOpen(true)
 	}
 
@@ -194,6 +288,17 @@ export function UserPlantViewPage() {
 		setIsCareEventOpen(false)
 	}
 
+	const openCareAnalysisModal = () => {
+		setAnalysisCity(aiCity || profileData?.user.city || '')
+		setIsCareAnalysisOpen(true)
+	}
+
+	const closeCareAnalysisModal = () => {
+		if (careAnalysisMutation.isPending) return
+
+		setIsCareAnalysisOpen(false)
+	}
+
 	const openDuplicateModal = () => {
 		resetDuplicate(getDuplicatePlantValues(data))
 		setIsDuplicateOpen(true)
@@ -209,6 +314,16 @@ export function UserPlantViewPage() {
 	const onDuplicateSubmit = handleDuplicateSubmit(formValues => {
 		duplicateMutation.mutate(formValues)
 	})
+
+	const handleApplyAnalysisAdjustments = () => {
+		if (!careAnalysis) return
+
+		reset(getPlantFormValues(data))
+		applySuggestedValues(careAnalysis.suggestedAdjustments)
+		setIsCareAnalysisOpen(false)
+		setIsEditOpen(true)
+		toast.success('Рекомендации перенесены в форму редактирования')
+	}
 
 	const onCareEventSubmit = handleCareEventSubmit(async formValues => {
 		const payload: CreatePlantCareEvent = {
@@ -308,6 +423,7 @@ export function UserPlantViewPage() {
 						/>
 						<PlantActionsPanel
 							onAddEvent={openCareEventModal}
+							onAnalyzeCare={openCareAnalysisModal}
 							onDuplicate={openDuplicateModal}
 							onEdit={openEditModal}
 						/>
@@ -316,12 +432,29 @@ export function UserPlantViewPage() {
 			</section>
 
 			<PlantEditModal
+				aiCity={aiCity}
+				aiSuggestion={aiSuggestion}
 				isOpen={isEditOpen}
+				isAiSuggestPending={aiSuggestMutation.isPending}
 				isPending={updatePlantMutation.isPending}
 				register={register}
+				onAiCityChange={setAiCity}
+				onAiSuggest={() => aiSuggestMutation.mutate()}
 				onClose={closeEditModal}
 				onPhotoChange={setPhotoFile}
 				onSubmit={onSubmit}
+			/>
+			<PlantCareAnalysisModal
+				analysis={careAnalysis}
+				city={analysisCity}
+				isOpen={isCareAnalysisOpen}
+				isPending={careAnalysisMutation.isPending}
+				question={analysisQuestion}
+				onAnalyze={() => careAnalysisMutation.mutate()}
+				onApplyAdjustments={handleApplyAnalysisAdjustments}
+				onCityChange={setAnalysisCity}
+				onClose={closeCareAnalysisModal}
+				onQuestionChange={setAnalysisQuestion}
 			/>
 			<CareEventModal
 				isOpen={isCareEventOpen}

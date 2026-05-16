@@ -18,6 +18,10 @@ const navLinks = [
 	{
 		label: 'Мои растения',
 		href: DASHBOARD_PAGES.PLANTS
+	},
+	{
+		label: 'Профиль',
+		href: DASHBOARD_PAGES.PROFILE
 	}
 ]
 

@@ -3,12 +3,15 @@ export interface AuthForm {
 	password: string
 }
 
-export interface User {
-	id: number
-	name?: string
-	email: string
+export type WindowDirection = 'north' | 'east' | 'south' | 'west'
 
-	plants: []
+export interface User {
+	id: string
+	name?: string | null
+	email: string
+	city?: string | null
+	windowDirections?: WindowDirection[]
+	plants?: []
 }
 
 export interface AuthResponse {
@@ -16,4 +19,7 @@ export interface AuthResponse {
 	user: User
 }
 
-export type TypeUserForm = Omit<User, 'id'> & { password?: string }
+export type TypeUserForm = Pick<
+	User,
+	'email' | 'name' | 'city' | 'windowDirections'
+> & { password?: string }

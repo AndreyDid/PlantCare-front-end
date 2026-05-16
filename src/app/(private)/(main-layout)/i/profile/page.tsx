@@ -1,13 +1,13 @@
 import type { Metadata } from 'next'
 
-import Auth from './auth/Auth'
 import { NO_INDEX_PAGE } from '@/src/constants/seo.constants'
+import { ProfilePage } from '@/src/screens/Profile/ProfilePage'
 
 export const metadata: Metadata = {
-	title: 'Auth',
+	title: 'Profile',
 	...NO_INDEX_PAGE
 }
 
-export default function Home() {
-	return <Auth />
+export default function Page() {
+	return <ProfilePage />
 }

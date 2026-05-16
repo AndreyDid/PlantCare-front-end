@@ -3,6 +3,7 @@ class DASHBOARD {
 
 	HOME = this.root
 	PLANTS = `${this.root}/plants`
+	PROFILE = `${this.root}/profile`
 	PLANT = (id: string) => `${this.root}/${id}`
 }
 

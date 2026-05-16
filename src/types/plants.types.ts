@@ -34,6 +34,51 @@ export interface WateringOverview {
 	dueTomorrow: GetPlant[]
 }
 
+export interface PlantWeatherSummary {
+	city: string
+	resolvedLocation: string
+	periodStart: string
+	periodEnd: string
+	averageTemperatureC: number | null
+	averageHumidityPercent: number | null
+	totalPrecipitationMm: number | null
+	averageVapourPressureDeficitKpa: number | null
+}
+
+export interface PlantAiSuggestion {
+	plantName: string | null
+	latinName: string | null
+	confidence: 'low' | 'medium' | 'high'
+	summary: string | null
+	suggestion: UpdateUserPlant
+	commonProblems: string[]
+	warnings: string[]
+	weather: PlantWeatherSummary | null
+}
+
+export interface SuggestPlantCareRequest {
+	plantName: string
+	city?: string | null
+	currentValues?: Record<string, unknown>
+}
+
+export interface ExistingPlantAiRequest {
+	city?: string | null
+	question?: string | null
+}
+
+export interface PlantCareAnalysis {
+	summary: string
+	wateringStatus: 'underwatered' | 'overwatered' | 'balanced' | 'unknown'
+	wateringReasoning: string
+	weatherImpact: string | null
+	recommendations: string[]
+	risks: string[]
+	nextActions: string[]
+	suggestedAdjustments: UpdateUserPlant
+	weather: PlantWeatherSummary | null
+}
+
 export type PlantCareEventType =
 	| 'WATERING'
 	| 'FERTILIZING'

@@ -1,10 +1,14 @@
 import {
 	CreatePlantCareEvent,
 	CreateUserPlant,
+	ExistingPlantAiRequest,
 	GetPlant,
 	GetUserPlantById,
+	PlantAiSuggestion,
+	PlantCareAnalysis,
 	PlantCareEvent,
 	PlantForm,
+	SuggestPlantCareRequest,
 	UpdateUserPlant,
 	WateringOverview
 } from '../types/plants.types'
@@ -72,6 +76,33 @@ class UserPlantService {
 		)
 
 		return getAbsoluteUploadUrl(response.data.url)
+	}
+
+	async suggestCare(data: SuggestPlantCareRequest) {
+		const response = await axiosWithAuth.post<PlantAiSuggestion>(
+			`${this.BASE_URL}/ai/suggest`,
+			data
+		)
+
+		return response.data
+	}
+
+	async suggestExistingCare(id: string, data: ExistingPlantAiRequest) {
+		const response = await axiosWithAuth.post<PlantAiSuggestion>(
+			`${this.BASE_URL}/${id}/ai/suggest`,
+			data
+		)
+
+		return response.data
+	}
+
+	async analyzeCare(id: string, data: ExistingPlantAiRequest) {
+		const response = await axiosWithAuth.post<PlantCareAnalysis>(
+			`${this.BASE_URL}/${id}/ai/analyze-care`,
+			data
+		)
+
+		return response.data
 	}
 
 	async update(id: string, data: UpdateUserPlant) {

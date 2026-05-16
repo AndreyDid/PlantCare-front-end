@@ -1,15 +1,25 @@
+import { Sparkles } from 'lucide-react'
 import type { FormEventHandler } from 'react'
 import type { UseFormRegister } from 'react-hook-form'
 
+import { PlantAiSuggestionCard } from '@/src/components/PlantAiSuggestionCard'
 import { Button } from '@/src/components/ui/buttons/Button'
 import { Field } from '@/src/components/ui/fields/Field'
 import { Modal } from '@/src/components/ui/modal/Modal'
 import { nullableNumber } from '@/src/shared/utils/nullable.utils'
-import type { UpdateUserPlant } from '@/src/types/plants.types'
+import type {
+	PlantAiSuggestion,
+	UpdateUserPlant
+} from '@/src/types/plants.types'
 
 interface PlantEditModalProps {
+	aiCity: string
+	aiSuggestion: PlantAiSuggestion | null
 	isOpen: boolean
+	isAiSuggestPending: boolean
 	isPending: boolean
+	onAiCityChange: (city: string) => void
+	onAiSuggest: () => void
 	onClose: () => void
 	onPhotoChange: (file: File | null) => void
 	onSubmit: FormEventHandler<HTMLFormElement>
@@ -17,8 +27,13 @@ interface PlantEditModalProps {
 }
 
 export function PlantEditModal({
+	aiCity,
+	aiSuggestion,
 	isOpen,
+	isAiSuggestPending,
 	isPending,
+	onAiCityChange,
+	onAiSuggest,
 	onClose,
 	onPhotoChange,
 	onSubmit,
@@ -37,6 +52,32 @@ export function PlantEditModal({
 			className='max-w-5xl'
 		>
 			<form onSubmit={onSubmit}>
+				<div className='mb-6 rounded-[22px] border border-white/10 bg-white/[0.04] p-4'>
+					<div className='grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px] sm:items-end'>
+						<Field
+							id='editAiCity'
+							label='Город для учета погоды'
+							placeholder='Например, Москва'
+							type='text'
+							value={aiCity}
+							onChange={event => onAiCityChange(event.target.value)}
+						/>
+						<Button
+							type='button'
+							disabled={isAiSuggestPending || isPending}
+							className='h-[52px] rounded-2xl border border-emerald-200/20 bg-emerald-300/10 px-4 py-3 text-emerald-50 hover:bg-emerald-300/15'
+							onClick={onAiSuggest}
+						>
+							<Sparkles size={17} />
+							{isAiSuggestPending ? 'Заполняем...' : 'Заполнить через ИИ'}
+						</Button>
+					</div>
+					<PlantAiSuggestionCard
+						suggestion={aiSuggestion}
+						className='mt-4'
+					/>
+				</div>
+
 				<div className='grid gap-x-4 sm:grid-cols-2'>
 					<Field
 						id='plantName'
@@ -327,4 +368,3 @@ export function PlantEditModal({
 		</Modal>
 	)
 }
-
