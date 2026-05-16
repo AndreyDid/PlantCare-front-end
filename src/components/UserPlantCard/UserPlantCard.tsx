@@ -26,10 +26,10 @@ const seasonLabels = {
 } as const
 
 const statusToneClasses = {
-	danger: 'border-red-300/25 bg-red-400/12 text-red-100',
-	warning: 'border-amber-300/25 bg-amber-300/12 text-amber-100',
-	good: 'border-emerald-300/25 bg-emerald-300/12 text-emerald-100',
-	muted: 'border-white/10 bg-white/5 text-white/60'
+	danger: 'border-red-300/25 bg-red-400/15 text-red-50',
+	warning: 'border-amber-300/25 bg-amber-300/15 text-amber-50',
+	good: 'border-emerald-300/25 bg-emerald-300/15 text-emerald-50',
+	muted: 'border-white/10 bg-white/8 text-white/65'
 } as const
 
 function getDate(date?: string | null) {
@@ -164,12 +164,18 @@ function PlantFact({
 	value: string
 }) {
 	return (
-		<div className='rounded-xl border border-white/8 bg-white/[0.04] p-3'>
-			<div className='mb-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-white/40'>
+		<div className='flex min-w-0 items-center gap-2.5'>
+			<span className='flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/8 bg-white/[0.05] text-emerald-100/80'>
 				{icon}
-				{label}
+			</span>
+			<div className='min-w-0'>
+				<p className='truncate text-[11px] uppercase tracking-[0.14em] text-white/38'>
+					{label}
+				</p>
+				<p className='truncate text-sm font-medium leading-5 text-white/82'>
+					{value}
+				</p>
 			</div>
-			<p className='text-sm leading-5 text-white/80'>{value}</p>
 		</div>
 	)
 }
@@ -184,7 +190,7 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 
 	return (
 		<div
-			className='cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(0,0,0,0.18),rgba(255,255,255,0.04))] shadow-[0_16px_46px_rgba(0,0,0,0.22)] transition hover:border-emerald-200/30'
+			className='group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] shadow-[0_14px_38px_rgba(0,0,0,0.18)] transition duration-200 hover:-translate-y-0.5 hover:border-emerald-200/30 hover:bg-white/[0.065]'
 			onClick={() => router.push(DASHBOARD_PAGES.PLANT(plant.id))}
 			role='link'
 			tabIndex={0}
@@ -195,81 +201,87 @@ export function UserPlantCard({ plant }: { plant: GetPlant }) {
 				}
 			}}
 		>
-			<div className='relative h-64 w-full overflow-hidden sm:h-72'>
+			<div className='relative h-36 w-full overflow-hidden bg-emerald-300/10 sm:h-40'>
 				{plant.photoUrl ? (
 					<Image
 						src={plant.photoUrl}
 						alt={plant.plantName}
 						fill
 						unoptimized
-						sizes='(max-width: 1024px) 100vw, 720px'
-						className='object-cover'
+						sizes='(max-width: 640px) 100vw, (max-width: 1280px) 33vw, 25vw'
+						className='object-cover transition duration-300 group-hover:scale-[1.03]'
 					/>
 				) : (
-					<div className='flex h-full items-center justify-center bg-[linear-gradient(135deg,rgba(142,229,143,0.18),rgba(255,255,255,0.05))] text-emerald-100'>
-						<Flower2 size={86} />
+					<div className='flex h-full items-center justify-center bg-[linear-gradient(135deg,rgba(142,229,143,0.2),rgba(255,255,255,0.06))] text-emerald-100'>
+						<Flower2 size={54} />
 					</div>
 				)}
+				<div className='absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#07110d]/90 to-transparent' />
 				<div
-					className={`absolute left-4 top-4 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-md ${statusToneClasses[wateringStatus.tone]}`}
+					className={`absolute left-3 top-3 max-w-[calc(100%-1.5rem)] truncate rounded-full border px-2.5 py-1 text-xs font-medium shadow-[0_8px_22px_rgba(0,0,0,0.2)] backdrop-blur-md ${statusToneClasses[wateringStatus.tone]}`}
 				>
 					{wateringStatus.label}
 				</div>
 			</div>
-			<div className='p-5'>
-				<div className='mb-5 flex items-start justify-between gap-4'>
+			<div className='p-4'>
+				<div className='mb-4 flex items-start justify-between gap-3'>
 					<div className='min-w-0'>
-						<p className='mb-2 truncate text-[12px] uppercase tracking-[0.28em] text-emerald-100/55'>
+						<p className='mb-1 truncate text-[11px] uppercase tracking-[0.18em] text-emerald-100/55'>
 							{plant.plantName}
 						</p>
-						<h3 className='text-lg font-semibold leading-6 text-white'>
+						<h3 className='truncate text-base font-semibold leading-6 text-white'>
 							{plant.nickname || plant.plantName}
 						</h3>
 						{plant.location ? (
-							<p className='mt-2 flex items-center gap-1.5 text-xs text-white/55'>
-								<MapPin size={14} />
-								{plant.location}
+							<p className='mt-1.5 flex min-w-0 items-center gap-1.5 text-xs text-white/55'>
+								<MapPin
+									size={13}
+									className='shrink-0'
+								/>
+								<span className='truncate'>{plant.location}</span>
 							</p>
 						) : null}
 					</div>
 					<Button
 						type='button'
 						aria-label='Удалить растение'
-						className='h-10 w-10 shrink-0 rounded-xl px-0 text-white/65 hover:border-red-200/30 hover:text-red-100'
+						className='h-8 w-8 shrink-0 rounded-lg border-white/8 bg-black/10 px-0 text-white/55 hover:border-red-200/30 hover:bg-red-400/10 hover:text-red-100'
 						disabled={isPending}
 						onClick={event => {
 							event.stopPropagation()
 							mutate()
 						}}
 					>
-						<Trash />
+						<Trash size={15} />
 					</Button>
 				</div>
-				<div className='grid gap-3'>
+
+				<div className='mb-3 rounded-xl border border-emerald-200/12 bg-emerald-300/[0.06] px-3 py-2.5'>
 					<PlantFact
-						icon={<Droplets size={14} />}
-						label='Следующий полив'
+						icon={<Droplets size={15} />}
+						label='Полив'
 						value={formatDate(plant.nextWateringAt)}
 					/>
-					<div className='grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2'>
-						<PlantFact
-							icon={<CalendarDays size={14} />}
-							label='Поливали'
-							value={formatDate(plant.lastWateredAt)}
-						/>
-						<PlantFact
-							icon={<Timer size={14} />}
-							label={`Интервал · ${seasonLabels[activeSeason]}`}
-							value={
-								activeWateringInterval
-									? `Каждые ${formatDays(activeWateringInterval)}`
-									: 'Не задан'
-							}
-						/>
-					</div>
+				</div>
+
+				<div className='grid gap-2.5 border-t border-white/8 pt-3'>
+					<PlantFact
+						icon={<Timer size={14} />}
+						label={seasonLabels[activeSeason]}
+						value={
+							activeWateringInterval
+								? `Каждые ${formatDays(activeWateringInterval)}`
+								: 'Интервал не задан'
+						}
+					/>
+					<PlantFact
+						icon={<CalendarDays size={14} />}
+						label='Поливали'
+						value={formatDate(plant.lastWateredAt)}
+					/>
 					<PlantFact
 						icon={<Sprout size={14} />}
-						label='В коллекции'
+						label='Добавлено'
 						value={formatDate(plant.createdAt)}
 					/>
 				</div>

@@ -8,18 +8,24 @@ import { useUserPlants } from '@/src/hooks/userPlants'
 
 function PlantCardSkeleton() {
 	return (
-		<div className='rounded-[24px] border border-white/10 bg-black/15 p-5'>
-			<div className='mb-6 flex items-center justify-between gap-4'>
-				<div className='space-y-3'>
-					<div className='h-3 w-24 rounded-full bg-white/10' />
-					<div className='h-6 w-40 rounded-full bg-white/10' />
+		<div className='overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045]'>
+			<div className='h-36 bg-white/8 sm:h-40' />
+			<div className='p-4'>
+				<div className='mb-4 flex items-start justify-between gap-3'>
+					<div className='space-y-2'>
+						<div className='h-3 w-24 rounded-full bg-white/10' />
+						<div className='h-5 w-36 rounded-full bg-white/10' />
+						<div className='h-3 w-28 rounded-full bg-white/10' />
+					</div>
+					<div className='h-8 w-8 rounded-lg bg-white/10' />
 				</div>
-				<div className='h-12 w-12 rounded-2xl bg-white/10' />
-			</div>
-			<div className='grid gap-3 sm:grid-cols-1'>
-				<div className='rounded-2xl border border-white/8 bg-white/5 p-4'>
-					<div className='mb-3 h-3 w-24 rounded-full bg-white/10' />
-					<div className='h-5 w-32 rounded-full bg-white/10' />
+				<div className='mb-3 rounded-xl border border-white/8 bg-white/[0.04] p-3'>
+					<div className='h-8 rounded-full bg-white/8' />
+				</div>
+				<div className='space-y-3 border-t border-white/8 pt-3'>
+					<div className='h-8 rounded-full bg-white/8' />
+					<div className='h-8 rounded-full bg-white/8' />
+					<div className='h-8 rounded-full bg-white/8' />
 				</div>
 			</div>
 		</div>
@@ -32,7 +38,7 @@ export function UserPlantsList() {
 
 	if (isLoading) {
 		return (
-			<div className='grid gap-4 xl:grid-cols-2'>
+			<div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
 				{Array.from({ length: 4 }).map((_, index) => (
 					<PlantCardSkeleton key={index} />
 				))}
@@ -58,10 +64,7 @@ export function UserPlantsList() {
 	}
 
 	return (
-		<div
-			className='grid gap-4 xl:grid-cols-4 sm:grid-cols-3 md
-		:grid-cols-4'
-		>
+		<div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
 			{plants.map(plant => (
 				<UserPlantCard
 					key={plant.id}
