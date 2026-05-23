@@ -3,6 +3,7 @@ import axios, { type CreateAxiosDefaults } from 'axios'
 import {
 	clearAuthSession,
 	getAccessToken,
+	saveTokenStorage
 } from '../services/auth-token.service'
 
 import { errorCatch } from './error'
@@ -22,6 +23,24 @@ const options: CreateAxiosDefaults = {
 
 const axiosClassic = axios.create(options)
 const axiosWithAuth = axios.create(options)
+let refreshTokenRequest: Promise<void> | null = null
+
+function refreshAccessToken() {
+	refreshTokenRequest ??= axiosClassic
+		.post<AuthResponse>('/auth/login/access-token')
+		.then(response => {
+			if (!response.data.accessToken) {
+				throw new Error('Access token was not returned')
+			}
+
+			saveTokenStorage(response.data.accessToken)
+		})
+		.finally(() => {
+			refreshTokenRequest = null
+		})
+
+	return refreshTokenRequest
+}
 
 axiosWithAuth.interceptors.request.use(config => {
 	const accessToken = getAccessToken()
@@ -41,25 +60,10 @@ axiosWithAuth.interceptors.response.use(
 			errorCatch(error) === 'jwt expired' ||
 			errorCatch(error) === 'jwt must be provided'
 
-		if (
-			isUnauthorized &&
-			error.config &&
-			!error.config._isRetry
-		) {
+		if (isUnauthorized && error.config && !error.config._isRetry) {
 			originalRequest._isRetry = true
 			try {
-				const response = await axiosClassic.post<AuthResponse>(
-					'/auth/login/access-token'
-				)
-
-				if (response.data.accessToken) {
-					const { saveTokenStorage } = await import(
-						'../services/auth-token.service'
-					)
-
-					saveTokenStorage(response.data.accessToken)
-				}
-
+				await refreshAccessToken()
 				return axiosWithAuth.request(originalRequest)
 			} catch {
 				clearAuthSession()

@@ -8,17 +8,19 @@ export async function proxy(request: NextRequest) {
 	const { pathname } = nextUrl
 
 	const hasAccessToken = Boolean(cookies.get(EnumTokens.ACCESS_TOKEN)?.value)
+	const hasRefreshToken = Boolean(cookies.get(EnumTokens.REFRESH_TOKEN)?.value)
+	const hasSession = hasAccessToken || hasRefreshToken
 	const isAuthPage =
 		pathname === '/' || pathname === '/auth' || pathname.startsWith('/auth/')
 	const isDashboardPage =
 		pathname === DASHBOARD_PAGES.HOME ||
 		pathname.startsWith(`${DASHBOARD_PAGES.HOME}/`)
 
-	if (isAuthPage && hasAccessToken) {
+	if (isAuthPage && hasSession) {
 		return NextResponse.redirect(new URL(DASHBOARD_PAGES.HOME, request.url))
 	}
 
-	if (isDashboardPage && !hasAccessToken) {
+	if (isDashboardPage && !hasSession) {
 		return NextResponse.redirect(new URL('/', request.url))
 	}
 

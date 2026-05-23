@@ -1,6 +1,7 @@
 export interface AuthForm {
 	email: string
 	password: string
+	rememberMe?: boolean
 }
 
 export type WindowDirection = 'north' | 'east' | 'south' | 'west'

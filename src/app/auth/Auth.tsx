@@ -13,14 +13,21 @@ import { authService } from '@/src/services/auth.service'
 import { AuthForm } from '@/src/types/auth.types'
 
 export default function Auth() {
-	const { register, handleSubmit, reset } = useForm<AuthForm>()
+	const { register, handleSubmit, reset } = useForm<AuthForm>({
+		defaultValues: {
+			rememberMe: false
+		}
+	})
 	const [isLoginForm, setIsLoginForm] = useState(true)
 	const { push } = useRouter()
 
 	const { mutate, isPending } = useMutation({
 		mutationKey: ['auth'],
 		mutationFn: (data: AuthForm) =>
-			authService.main(isLoginForm ? 'login' : 'register', data),
+			authService.main(isLoginForm ? 'login' : 'register', {
+				...data,
+				rememberMe: isLoginForm ? Boolean(data.rememberMe) : false
+			}),
 		onSuccess() {
 			toast.success('Вход выполнен успешно!')
 			reset()
@@ -93,9 +100,27 @@ export default function Auth() {
 					label='Пароль'
 					placeholder='Введите пароль'
 					type='password'
-					extra='mb-6'
+					extra={isLoginForm ? 'mb-4' : 'mb-6'}
 					{...register('password', { required: 'Невалидный пароль' })}
 				/>
+
+				{isLoginForm ? (
+					<label className='mb-6 flex cursor-pointer items-start gap-3 rounded-2xl border border-white/10 bg-black/10 p-3 text-sm text-white/65 transition hover:bg-white/[0.06]'>
+						<input
+							type='checkbox'
+							className='mt-0.5 h-4 w-4 shrink-0 accent-emerald-300'
+							{...register('rememberMe')}
+						/>
+						<span className='min-w-0'>
+							<span className='block font-medium text-white'>
+								Запомнить меня
+							</span>
+							<span className='mt-1 block text-xs leading-5 text-white/45'>
+								Оставаться в аккаунте на этом устройстве после закрытия браузера.
+							</span>
+						</span>
+					</label>
+				) : null}
 
 				<div className='flex flex-col gap-4'>
 					<Button

@@ -1,6 +1,7 @@
 import Cookies from 'js-cookie'
 
 const isProduction = process.env.NODE_ENV === 'production'
+const ACCESS_TOKEN_EXPIRES_DAYS = 15 / 60 / 24
 const accessTokenCookieOptions = {
 	sameSite: 'strict' as const,
 	secure: isProduction
@@ -19,7 +20,7 @@ export const getAccessToken = () => {
 export const saveTokenStorage = (accessToken: string) => {
 	Cookies.set(EnumTokens.ACCESS_TOKEN, accessToken, {
 		...accessTokenCookieOptions,
-		expires: 1
+		expires: ACCESS_TOKEN_EXPIRES_DAYS
 	})
 }
 
