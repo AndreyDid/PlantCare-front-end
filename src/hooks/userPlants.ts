@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { userPlantService } from '../services/userPlant.service'
-import { CreatePlantCareEvent, UpdateUserPlant } from '../types/plants.types'
+import {
+	CreatePlantCareEvent,
+	PlantCareEventFilters,
+	UpdateUserPlant
+} from '../types/plants.types'
 
 export function useUserPlants() {
 	const { data, isLoading } = useQuery({
@@ -36,6 +40,13 @@ export function usePlantCareEvents(id: string) {
 	return useQuery({
 		queryKey: ['userPlants', id, 'careEvents'],
 		queryFn: () => userPlantService.getCareEvents(id)
+	})
+}
+
+export function useAllPlantCareEvents(filters: PlantCareEventFilters) {
+	return useQuery({
+		queryKey: ['userPlants', 'careEvents', filters],
+		queryFn: () => userPlantService.getAllCareEvents(filters)
 	})
 }
 

@@ -21,6 +21,10 @@ const navLinks = [
 		href: DASHBOARD_PAGES.PLANTS
 	},
 	{
+		label: 'История',
+		href: DASHBOARD_PAGES.HISTORY
+	},
+	{
 		label: 'Профиль',
 		href: DASHBOARD_PAGES.PROFILE
 	}
@@ -72,7 +76,9 @@ export function Header() {
 						)
 					})}
 				</nav>
-				<LogoutButton className='hidden md:inline-flex' />
+				<div className='hidden md:block'>
+					<LogoutButton />
+				</div>
 				<button
 					type='button'
 					className='inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-black/15 text-white transition hover:bg-white/10 md:hidden'

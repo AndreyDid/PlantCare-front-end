@@ -1,12 +1,12 @@
 import axios, { type CreateAxiosDefaults } from 'axios'
 
 import {
+	clearAuthSession,
 	getAccessToken,
-	removeFromStorage
 } from '../services/auth-token.service'
-import { authService } from '../services/auth.service'
 
 import { errorCatch } from './error'
+import type { AuthResponse } from '../types/auth.types'
 
 const API_URL = (
 	process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4200/api'
@@ -36,21 +36,38 @@ axiosWithAuth.interceptors.response.use(
 	config => config,
 	async error => {
 		const originalRequest = error.config
+		const isUnauthorized =
+			error?.response?.status === 401 ||
+			errorCatch(error) === 'jwt expired' ||
+			errorCatch(error) === 'jwt must be provided'
 
 		if (
-			(error?.response?.status === 401 ||
-				errorCatch(error) === 'jwt expired' ||
-				errorCatch(error) === 'jwt must be provided') &&
+			isUnauthorized &&
 			error.config &&
 			!error.config._isRetry
 		) {
 			originalRequest._isRetry = true
 			try {
-				await authService.getNewTokens()
+				const response = await axiosClassic.post<AuthResponse>(
+					'/auth/login/access-token'
+				)
+
+				if (response.data.accessToken) {
+					const { saveTokenStorage } = await import(
+						'../services/auth-token.service'
+					)
+
+					saveTokenStorage(response.data.accessToken)
+				}
+
 				return axiosWithAuth.request(originalRequest)
-			} catch (error) {
-				if (errorCatch(error) === 'jwt expired') removeFromStorage()
+			} catch {
+				clearAuthSession()
 			}
+		}
+
+		if (isUnauthorized) {
+			clearAuthSession()
 		}
 
 		throw error

@@ -7,6 +7,8 @@ import {
 	PlantAiSuggestion,
 	PlantCareAnalysis,
 	PlantCareEvent,
+	PlantCareEventFilters,
+	PlantCareEventWithPlant,
 	PlantForm,
 	SuggestPlantCareRequest,
 	UpdateUserPlant,
@@ -126,6 +128,20 @@ class UserPlantService {
 	async getCareEvents(id: string) {
 		const response = await axiosWithAuth.get<PlantCareEvent[]>(
 			`${this.BASE_URL}/${id}/events`
+		)
+
+		return response.data
+	}
+
+	async getAllCareEvents(filters?: PlantCareEventFilters) {
+		const params = Object.fromEntries(
+			Object.entries(filters ?? {}).filter(([, value]) => Boolean(value))
+		)
+		const response = await axiosWithAuth.get<PlantCareEventWithPlant[]>(
+			`${this.BASE_URL}/events`,
+			{
+				params
+			}
 		)
 
 		return response.data

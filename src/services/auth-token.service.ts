@@ -30,3 +30,18 @@ export const removeFromStorage = () => {
 		domain: 'localhost'
 	})
 }
+
+export const clearAuthSession = () => {
+	removeFromStorage()
+
+	if (typeof window === 'undefined') return
+
+	const isAuthPage =
+		window.location.pathname === '/' ||
+		window.location.pathname === '/auth' ||
+		window.location.pathname.startsWith('/auth/')
+
+	if (!isAuthPage) {
+		window.location.assign('/auth')
+	}
+}

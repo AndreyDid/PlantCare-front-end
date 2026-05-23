@@ -135,6 +135,20 @@ export interface PlantCareEvent {
 	updatedAt: string
 }
 
+export interface PlantCareEventWithPlant extends PlantCareEvent {
+	plant: Pick<
+		GetPlant,
+		'id' | 'nickname' | 'plantName' | 'location' | 'photoUrl'
+	>
+}
+
+export interface PlantCareEventFilters {
+	plantId?: string
+	type?: PlantCareEventType
+	dateFrom?: string
+	dateTo?: string
+}
+
 export interface CreatePlantCareEvent {
 	type: PlantCareEventType
 	title?: string | null
