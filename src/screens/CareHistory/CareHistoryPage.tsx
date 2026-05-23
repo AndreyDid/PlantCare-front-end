@@ -1,6 +1,18 @@
 'use client'
 
-import { CalendarDays, Filter, History, RotateCcw, Sprout } from 'lucide-react'
+import {
+	CalendarDays,
+	Clock3,
+	Droplets,
+	Eye,
+	Filter,
+	FlaskConical,
+	History,
+	RefreshCw,
+	RotateCcw,
+	Sprout,
+	StickyNote
+} from 'lucide-react'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
@@ -42,7 +54,7 @@ function getCareEventBadgeClass(type: PlantCareEventType) {
 	}
 
 	if (type === 'FERTILIZING') {
-		return 'border-amber-200/20 bg-amber-300/10 text-amber-100'
+		return 'border-lime-200/20 bg-lime-300/10 text-lime-100'
 	}
 
 	if (type === 'REPOTTING') {
@@ -56,8 +68,142 @@ function getCareEventBadgeClass(type: PlantCareEventType) {
 	return 'border-white/12 bg-white/8 text-white/75'
 }
 
+function getCareEventIconClass(type: PlantCareEventType) {
+	if (type === 'WATERING') {
+		return 'border-emerald-200/25 bg-emerald-300/12 text-emerald-100 shadow-[0_0_28px_rgba(52,211,153,0.12)]'
+	}
+
+	if (type === 'FERTILIZING') {
+		return 'border-lime-200/25 bg-lime-300/12 text-lime-100 shadow-[0_0_28px_rgba(190,242,100,0.1)]'
+	}
+
+	if (type === 'REPOTTING') {
+		return 'border-sky-200/25 bg-sky-300/12 text-sky-100 shadow-[0_0_28px_rgba(125,211,252,0.1)]'
+	}
+
+	if (type === 'OBSERVATION') {
+		return 'border-violet-200/25 bg-violet-300/12 text-violet-100 shadow-[0_0_28px_rgba(196,181,253,0.1)]'
+	}
+
+	return 'border-white/14 bg-white/8 text-white/75'
+}
+
+function CareEventIcon({
+	size,
+	type
+}: {
+	size: number
+	type: PlantCareEventType
+}) {
+	if (type === 'WATERING') return <Droplets size={size} />
+	if (type === 'FERTILIZING') return <FlaskConical size={size} />
+	if (type === 'REPOTTING') return <RefreshCw size={size} />
+	if (type === 'OBSERVATION') return <Eye size={size} />
+
+	return <StickyNote size={size} />
+}
+
 function getActiveFiltersCount(filters: PlantCareEventFilters) {
 	return Object.values(filters).filter(Boolean).length
+}
+
+function CareHistoryEventRow({ event }: { event: PlantCareEventWithPlant }) {
+	const customTitle = getCustomEventTitle(event)
+	const shouldShowHeadline = Boolean(customTitle || !event.description)
+
+	return (
+		<article className='group relative overflow-hidden rounded-[20px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.075),rgba(255,255,255,0.028))] p-3 shadow-[0_18px_46px_rgba(0,0,0,0.18)] transition duration-200 hover:border-emerald-100/18 hover:bg-white/[0.055] sm:rounded-[22px] sm:p-4'>
+			<div className='pointer-events-none absolute inset-y-4 left-[34px] hidden w-px bg-gradient-to-b from-transparent via-white/12 to-transparent lg:block' />
+			<div className='relative grid min-w-0 gap-3 lg:grid-cols-[48px_minmax(0,1fr)_minmax(230px,0.34fr)] lg:items-start'>
+				<div
+					className={`flex h-10 w-10 items-center justify-center rounded-[14px] border sm:h-11 sm:w-11 sm:rounded-2xl ${getCareEventIconClass(event.type)}`}
+				>
+					<CareEventIcon
+						type={event.type}
+						size={19}
+					/>
+				</div>
+
+				<div className='min-w-0'>
+					<div className='flex flex-wrap items-center gap-2'>
+						<span
+							className={`inline-flex min-h-8 items-center gap-1.5 rounded-xl border px-3 py-1 text-xs font-semibold ${getCareEventBadgeClass(event.type)}`}
+						>
+							<CareEventIcon
+								type={event.type}
+								size={14}
+							/>
+							{getCareEventLabel(event.type)}
+						</span>
+						{event.amountMl ? (
+							<span className='inline-flex min-h-8 items-center rounded-xl border border-white/8 bg-black/12 px-3 py-1 text-xs font-medium text-white/62'>
+								{event.amountMl} мл
+							</span>
+						) : null}
+					</div>
+
+					{shouldShowHeadline || event.description ? (
+						<div className='mt-3'>
+							{shouldShowHeadline ? (
+								<h3 className='text-base font-semibold leading-snug text-white'>
+									{customTitle || getCareEventLabel(event.type)}
+								</h3>
+							) : null}
+							{event.description ? (
+								<p
+									className={`max-w-3xl text-sm leading-6 text-white/62 ${
+										shouldShowHeadline ? 'mt-2' : ''
+									}`}
+								>
+									{event.description}
+								</p>
+							) : null}
+						</div>
+					) : null}
+				</div>
+
+				<div className='grid min-w-0 gap-2 rounded-[16px] border border-white/8 bg-black/12 p-3 sm:rounded-[18px] lg:justify-self-end lg:bg-black/10'>
+					<Link
+						href={DASHBOARD_PAGES.PLANT(event.plant.id)}
+						className='flex min-w-0 items-center gap-3 rounded-2xl transition hover:bg-white/[0.045] lg:min-w-[210px]'
+					>
+						<div className='flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/10 bg-white/8 text-emerald-100'>
+							{event.plant.photoUrl ? (
+								<div
+									aria-hidden='true'
+									className='h-full w-full bg-cover bg-center'
+									style={{
+										backgroundImage: `url(${event.plant.photoUrl})`
+									}}
+								/>
+							) : (
+								<Sprout size={18} />
+							)}
+						</div>
+						<div className='min-w-0'>
+							<p className='truncate text-sm font-semibold text-white'>
+								{getPlantTitle(event)}
+							</p>
+							{event.plant.location ? (
+								<p className='truncate text-xs text-white/45'>
+									{event.plant.location}
+								</p>
+							) : null}
+						</div>
+					</Link>
+					<div className='flex min-w-0 items-center gap-2 text-xs text-white/45'>
+						<Clock3
+							size={14}
+							className='shrink-0'
+						/>
+						<time className='min-w-0 truncate'>
+							{formatDateTime(event.eventAt)}
+						</time>
+					</div>
+				</div>
+			</div>
+		</article>
+	)
 }
 
 export function CareHistoryPage() {
@@ -263,12 +409,15 @@ export function CareHistoryPage() {
 									<span className='shrink-0'>{dateLabel}</span>
 									<div className='h-px flex-1 bg-white/10' />
 								</div>
-								<div className='overflow-hidden rounded-[18px] border border-white/8 bg-black/10 sm:rounded-[20px]'>
+								<div className='grid gap-3'>
 									{dayEvents.map(event => (
-										<article
+										<CareHistoryEventRow
 											key={event.id}
-											className='grid min-w-0 gap-3 border-white/8 p-3 sm:p-4 md:grid-cols-[minmax(190px,0.45fr)_minmax(0,1fr)_minmax(140px,auto)] md:items-center [&:not(:last-child)]:border-b'
-										>
+											event={event}
+										/>
+									))}
+									{/*
+										<article>
 											<Link
 												href={DASHBOARD_PAGES.PLANT(event.plant.id)}
 												className='flex min-w-0 items-center gap-2.5 rounded-2xl transition hover:bg-white/[0.04] md:-m-2 md:p-2'
@@ -331,7 +480,7 @@ export function CareHistoryPage() {
 												</time>
 											</div>
 										</article>
-									))}
+									*/}
 								</div>
 							</div>
 						))}
