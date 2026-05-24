@@ -19,7 +19,7 @@ export default function Auth() {
 		}
 	})
 	const [isLoginForm, setIsLoginForm] = useState(true)
-	const { push } = useRouter()
+	const router = useRouter()
 
 	const { mutate, isPending } = useMutation({
 		mutationKey: ['auth'],
@@ -31,7 +31,8 @@ export default function Auth() {
 		onSuccess() {
 			toast.success('Вход выполнен успешно!')
 			reset()
-			push(DASHBOARD_PAGES.HOME)
+			router.replace(DASHBOARD_PAGES.HOME)
+			router.refresh()
 		}
 	})
 

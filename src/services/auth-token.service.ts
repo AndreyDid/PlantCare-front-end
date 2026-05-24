@@ -1,10 +1,16 @@
 import Cookies from 'js-cookie'
 
-const isProduction = process.env.NODE_ENV === 'production'
 const ACCESS_TOKEN_EXPIRES_DAYS = 15 / 60 / 24
-const accessTokenCookieOptions = {
-	sameSite: 'strict' as const,
-	secure: isProduction
+let isClearingAuthSession = false
+
+const getAccessTokenCookieOptions = () => {
+	const isHttps =
+		typeof window !== 'undefined' && window.location.protocol === 'https:'
+
+	return {
+		sameSite: 'strict' as const,
+		secure: isHttps
+	}
 }
 
 export enum EnumTokens {
@@ -19,20 +25,23 @@ export const getAccessToken = () => {
 
 export const saveTokenStorage = (accessToken: string) => {
 	Cookies.set(EnumTokens.ACCESS_TOKEN, accessToken, {
-		...accessTokenCookieOptions,
+		...getAccessTokenCookieOptions(),
 		expires: ACCESS_TOKEN_EXPIRES_DAYS
 	})
 }
 
 export const removeFromStorage = () => {
-	Cookies.remove(EnumTokens.ACCESS_TOKEN, accessTokenCookieOptions)
+	Cookies.remove(EnumTokens.ACCESS_TOKEN, getAccessTokenCookieOptions())
 	Cookies.remove(EnumTokens.ACCESS_TOKEN, {
-		...accessTokenCookieOptions,
+		...getAccessTokenCookieOptions(),
 		domain: 'localhost'
 	})
 }
 
 export const clearAuthSession = () => {
+	if (isClearingAuthSession) return
+
+	isClearingAuthSession = true
 	removeFromStorage()
 
 	if (typeof window === 'undefined') return
