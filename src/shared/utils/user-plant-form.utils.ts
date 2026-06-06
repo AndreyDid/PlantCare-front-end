@@ -110,9 +110,16 @@ export function getUpdatePlantPayload(
 		formValues.nextWateringAt
 
 	return {
-		...formValues,
+		plantName: nullableString(formValues.plantName) ?? '',
+		nickname: nullableString(formValues.nickname) ?? '',
+		plantTypeId: nullableString(formValues.plantTypeId),
 		photoUrl: nullableString(photoUrl),
 		location: nullableString(formValues.location),
+		lightLevel: nullableString(formValues.lightLevel),
+		temperatureMin: nullableNumber(formValues.temperatureMin),
+		temperatureMax: nullableNumber(formValues.temperatureMax),
+		humidityMin: nullableNumber(formValues.humidityMin),
+		humidityMax: nullableNumber(formValues.humidityMax),
 		fertilizingIntervalDays: nullableNumber(formValues.fertilizingIntervalDays),
 		wateringIntervalDays: nullableNumber(formValues.wateringIntervalDays),
 		wateringIntervalSpringDays: nullableNumber(
@@ -127,6 +134,7 @@ export function getUpdatePlantPayload(
 		wateringIntervalWinterDays: nullableNumber(
 			formValues.wateringIntervalWinterDays
 		),
+		wateringAmountMl: nullableNumber(formValues.wateringAmountMl),
 		potSize: nullableString(formValues.potSize),
 		potType: nullableString(formValues.potType),
 		soilType: nullableString(formValues.soilType),
@@ -139,4 +147,3 @@ export function getUpdatePlantPayload(
 		nextWateringAt: toIsoDate(nextWateringAt)
 	}
 }
-

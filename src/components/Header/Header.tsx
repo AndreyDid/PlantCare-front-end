@@ -21,6 +21,10 @@ const navLinks = [
 		href: DASHBOARD_PAGES.PLANTS
 	},
 	{
+		label: 'Галерея',
+		href: DASHBOARD_PAGES.GALLERY
+	},
+	{
 		label: 'История',
 		href: DASHBOARD_PAGES.HISTORY
 	},

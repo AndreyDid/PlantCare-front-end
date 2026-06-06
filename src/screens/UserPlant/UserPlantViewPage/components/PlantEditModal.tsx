@@ -3,6 +3,7 @@ import type { FormEventHandler } from 'react'
 import type { UseFormRegister } from 'react-hook-form'
 
 import { PlantAiSuggestionCard } from '@/src/components/PlantAiSuggestionCard'
+import { PhotoGalleryPicker } from '@/src/components/PhotoGalleryPicker'
 import { PlantWindowDirectionPicker } from '@/src/components/PlantWindowDirectionPicker'
 import { Button } from '@/src/components/ui/buttons/Button'
 import { Field } from '@/src/components/ui/fields/Field'
@@ -16,13 +17,16 @@ import type {
 interface PlantEditModalProps {
 	aiCity: string
 	aiSuggestion: PlantAiSuggestion | null
+	currentPlantId: string
 	isOpen: boolean
 	isAiSuggestPending: boolean
 	isPending: boolean
+	selectedPhotoUrl?: string | null
 	windowDirections?: string[] | null
 	onAiCityChange: (city: string) => void
 	onAiSuggest: () => void
 	onClose: () => void
+	onGalleryPhotoSelect: (url: string) => void
 	onPhotoChange: (file: File | null) => void
 	onWindowDirectionSelect: (values: {
 		location: string
@@ -35,13 +39,16 @@ interface PlantEditModalProps {
 export function PlantEditModal({
 	aiCity,
 	aiSuggestion,
+	currentPlantId,
 	isOpen,
 	isAiSuggestPending,
 	isPending,
+	selectedPhotoUrl,
 	windowDirections,
 	onAiCityChange,
 	onAiSuggest,
 	onClose,
+	onGalleryPhotoSelect,
 	onPhotoChange,
 	onWindowDirectionSelect,
 	onSubmit,
@@ -145,6 +152,11 @@ export function PlantEditModal({
 							onChange={event => {
 								onPhotoChange(event.target.files?.[0] ?? null)
 							}}
+						/>
+						<PhotoGalleryPicker
+							currentPlantId={currentPlantId}
+							selectedUrl={selectedPhotoUrl}
+							onSelect={onGalleryPhotoSelect}
 						/>
 					</div>
 					<Field

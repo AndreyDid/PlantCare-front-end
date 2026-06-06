@@ -202,6 +202,11 @@ export function UserPlantViewPage() {
 			'wateringIntervalWinterDays'
 		]
 	})
+	const selectedPhotoUrl =
+		useWatch({
+			control,
+			name: 'photoUrl'
+		}) ?? null
 
 	function applySuggestedValues(suggestion: UpdateUserPlant) {
 		aiSuggestionFields.forEach(field => {
@@ -354,6 +359,9 @@ export function UserPlantViewPage() {
 
 		setPhotoFile(null)
 		reset(getPlantFormValues(updatedPlant))
+		queryClient.invalidateQueries({
+			queryKey: ['photoGallery']
+		})
 		setIsEditOpen(false)
 		toast.success('Карточка растения обновлена')
 	})
@@ -434,15 +442,30 @@ export function UserPlantViewPage() {
 			<PlantEditModal
 				aiCity={aiCity}
 				aiSuggestion={aiSuggestion}
+				currentPlantId={id}
 				isOpen={isEditOpen}
 				isAiSuggestPending={aiSuggestMutation.isPending}
 				isPending={updatePlantMutation.isPending}
+				selectedPhotoUrl={selectedPhotoUrl}
 				windowDirections={profileData?.user.windowDirections}
 				register={register}
 				onAiCityChange={setAiCity}
 				onAiSuggest={() => aiSuggestMutation.mutate()}
 				onClose={closeEditModal}
-				onPhotoChange={setPhotoFile}
+				onGalleryPhotoSelect={url => {
+					setPhotoFile(null)
+					setValue('photoUrl', url, {
+						shouldDirty: true
+					})
+				}}
+				onPhotoChange={file => {
+					setPhotoFile(file)
+					if (file) {
+						setValue('photoUrl', null, {
+							shouldDirty: true
+						})
+					}
+				}}
 				onWindowDirectionSelect={values => {
 					setValue('location', values.location, {
 						shouldDirty: true

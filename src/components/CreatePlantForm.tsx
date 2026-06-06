@@ -3,7 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Plus, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { SubmitHandler, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { useUserProfile } from '../hooks/userProfile'
@@ -11,6 +11,7 @@ import { userPlantService } from '../services/userPlant.service'
 import { CreateUserPlant, PlantAiSuggestion } from '../types/plants.types'
 
 import { PlantAiSuggestionCard } from './PlantAiSuggestionCard'
+import { PhotoGalleryPicker } from './PhotoGalleryPicker'
 import { PlantWindowDirectionPicker } from './PlantWindowDirectionPicker'
 import { Button } from './ui/buttons/Button'
 import { Field } from './ui/fields/Field'
@@ -90,9 +91,14 @@ export function CreatePlantForm() {
 		() => (photoFile ? URL.createObjectURL(photoFile) : null),
 		[photoFile]
 	)
-	const { register, handleSubmit, reset, getValues, setValue } =
+	const { control, register, handleSubmit, reset, getValues, setValue } =
 		useForm<CreateUserPlant>()
 	const queryClient = useQueryClient()
+	const selectedGalleryPhotoUrl =
+		useWatch({
+			control,
+			name: 'photoUrl'
+		}) ?? null
 
 	const closeModal = () => {
 		setIsOpen(false)
@@ -126,6 +132,9 @@ export function CreatePlantForm() {
 			toast.success('Растение успешно добавлено')
 			queryClient.invalidateQueries({
 				queryKey: ['userPlants']
+			})
+			queryClient.invalidateQueries({
+				queryKey: ['photoGallery']
 			})
 			closeModal()
 		}
@@ -316,6 +325,9 @@ export function CreatePlantForm() {
 							className='mt-2 w-full rounded-[18px] border border-white/10 bg-white/6 px-4 py-3.5 text-base text-white outline-none transition duration-200 file:mr-4 file:rounded-xl file:border-0 file:bg-emerald-300 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-slate-950 hover:file:bg-emerald-200 focus:border-emerald-300/70 focus:bg-white/8'
 							onChange={event => {
 								setPhotoFile(event.target.files?.[0] ?? null)
+								setValue('photoUrl', null, {
+									shouldDirty: true
+								})
 							}}
 						/>
 						{photoPreviewUrl ? (
@@ -325,6 +337,22 @@ export function CreatePlantForm() {
 								style={{ backgroundImage: `url(${photoPreviewUrl})` }}
 							/>
 						) : null}
+						{!photoPreviewUrl && selectedGalleryPhotoUrl ? (
+							<div
+								aria-hidden='true'
+								className='mt-3 h-36 w-full rounded-2xl bg-cover bg-center'
+								style={{ backgroundImage: `url(${selectedGalleryPhotoUrl})` }}
+							/>
+						) : null}
+						<PhotoGalleryPicker
+							selectedUrl={selectedGalleryPhotoUrl}
+							onSelect={url => {
+								setPhotoFile(null)
+								setValue('photoUrl', url, {
+									shouldDirty: true
+								})
+							}}
+						/>
 					</div>
 
 					<div className='grid gap-x-4 sm:grid-cols-2'>

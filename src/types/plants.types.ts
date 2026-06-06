@@ -10,6 +10,19 @@ export interface PlantForm {
 	wateringIntervalWinterDays?: number | null
 }
 
+export interface PhotoGalleryItem {
+	key: string
+	url: string
+	size: number | null
+	uploadedAt: string | null
+	isUsed: boolean
+	usedByPlant: {
+		id: string
+		nickname: string | null
+		plantName: string | null
+	} | null
+}
+
 export interface GetPlant {
 	id: string
 	nickname: string

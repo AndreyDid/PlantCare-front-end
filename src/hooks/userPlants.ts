@@ -15,6 +15,13 @@ export function useUserPlants() {
 	return { data, isLoading }
 }
 
+export function usePhotoGallery() {
+	return useQuery({
+		queryKey: ['photoGallery'],
+		queryFn: () => userPlantService.getPhotoGallery()
+	})
+}
+
 export function useGetUserPlantsById(id: string) {
 	return useQuery({
 		queryKey: ['userPlants', id],
@@ -127,6 +134,18 @@ export function useDeleteUserPlant(id: string) {
 		mutationFn: () => userPlantService.delete(id),
 		onSuccess: () => {
 			invalidateUserPlantQueries(queryClient)
+		}
+	})
+}
+
+export function useDeleteGalleryPhoto() {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (url: string) => userPlantService.deletePhoto(url),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: ['photoGallery']
+			})
 		}
 	})
 }

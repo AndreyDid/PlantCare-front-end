@@ -9,6 +9,7 @@ import {
 	PlantCareEvent,
 	PlantCareEventFilters,
 	PlantCareEventWithPlant,
+	PhotoGalleryItem,
 	PlantForm,
 	SuggestPlantCareRequest,
 	UpdateUserPlant,
@@ -87,6 +88,27 @@ class UserPlantService {
 		)
 
 		return getAbsoluteUploadUrl(response.data.url)
+	}
+
+	async getPhotoGallery() {
+		const response = await axiosWithAuth.get<PhotoGalleryItem[]>(
+			`${this.BASE_URL}/photos`
+		)
+
+		return response.data
+	}
+
+	async deletePhoto(url: string) {
+		const response = await axiosWithAuth.delete<{ deleted: boolean; url: string }>(
+			`${this.BASE_URL}/photos`,
+			{
+				data: {
+					url
+				}
+			}
+		)
+
+		return response.data
 	}
 
 	async suggestCare(data: SuggestPlantCareRequest) {
