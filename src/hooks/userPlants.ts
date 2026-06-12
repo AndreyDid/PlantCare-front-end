@@ -63,6 +63,9 @@ function invalidateUserPlantQueries(
 	queryClient.invalidateQueries({
 		queryKey: ['userPlants']
 	})
+	queryClient.invalidateQueries({
+		queryKey: ['photoGallery']
+	})
 }
 
 export function useUpdateUserPlant(id: string) {

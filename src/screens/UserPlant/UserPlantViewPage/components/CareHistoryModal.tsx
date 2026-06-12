@@ -1,5 +1,7 @@
 import { Trash2 } from 'lucide-react'
+import Image from 'next/image'
 
+import { CareEventTypeIcon } from '@/src/components/CareEventTypeIcon'
 import { Modal } from '@/src/components/ui/modal/Modal'
 import { formatDateTime } from '@/src/shared/utils/date.utils'
 import {
@@ -43,16 +45,35 @@ export function CareHistoryModal({
 							key={event.id}
 							className='rounded-[20px] border border-white/8 bg-black/10 p-4'
 						>
-							<div className='flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between'>
-								<div>
-									<p className='text-sm font-semibold text-white'>
-										{getCareEventTitle(event)}
-									</p>
-									{getCareEventMeta(event) ? (
-										<p className='mt-1 text-xs text-emerald-100/70'>
-											{getCareEventMeta(event)}
+							<div className='flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between'>
+								<div className='flex min-w-0 gap-3'>
+									<div className='relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-white/8 text-emerald-100'>
+										{event.photoUrl ? (
+											<Image
+												src={event.photoUrl}
+												alt=''
+												fill
+												unoptimized
+												sizes='48px'
+												className='object-cover'
+											/>
+										) : (
+											<CareEventTypeIcon
+												type={event.type}
+												size={19}
+											/>
+										)}
+									</div>
+									<div className='min-w-0'>
+										<p className='text-sm font-semibold text-white'>
+											{getCareEventTitle(event)}
 										</p>
-									) : null}
+										{getCareEventMeta(event) ? (
+											<p className='mt-1 text-xs text-emerald-100/70'>
+												{getCareEventMeta(event)}
+											</p>
+										) : null}
+									</div>
 								</div>
 								<div className='flex items-center gap-3'>
 									<time className='text-xs text-white/45'>
@@ -86,4 +107,3 @@ export function CareHistoryModal({
 		</Modal>
 	)
 }
-

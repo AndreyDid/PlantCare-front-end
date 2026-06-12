@@ -23,9 +23,10 @@ export function PhotoGalleryPicker({
 	const { data, isLoading } = usePhotoGallery()
 	const availablePhotos = (data ?? []).filter(
 		photo =>
-			!photo.isUsed ||
-			photo.usedByPlant?.id === currentPlantId ||
-			photo.url === selectedUrl
+			photo.source !== 'careEvent' &&
+			(!photo.isUsed ||
+				photo.usedByPlant?.id === currentPlantId ||
+				photo.url === selectedUrl)
 	)
 
 	if (isLoading) {

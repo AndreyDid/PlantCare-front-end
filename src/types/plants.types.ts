@@ -15,11 +15,19 @@ export interface PhotoGalleryItem {
 	url: string
 	size: number | null
 	uploadedAt: string | null
+	source: 'plantProfile' | 'careEvent' | 'uploaded'
 	isUsed: boolean
 	usedByPlant: {
 		id: string
 		nickname: string | null
 		plantName: string | null
+		location: string | null
+	} | null
+	usedByCareEvent: {
+		id: string
+		type: PlantCareEventType
+		title: string | null
+		eventAt: string
 	} | null
 }
 
@@ -144,6 +152,7 @@ export interface PlantCareEvent {
 	description: string | null
 	eventAt: string
 	amountMl: number | null
+	photoUrl: string | null
 	createdAt: string
 	updatedAt: string
 }
@@ -168,6 +177,7 @@ export interface CreatePlantCareEvent {
 	description?: string | null
 	eventAt?: string | null
 	amountMl?: number | null
+	photoUrl?: string | null
 }
 
 export interface GetUserPlantById {

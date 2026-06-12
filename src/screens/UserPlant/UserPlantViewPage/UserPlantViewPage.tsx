@@ -85,6 +85,11 @@ export function UserPlantViewPage() {
 	const [isCareAnalysisOpen, setIsCareAnalysisOpen] = useState(false)
 	const [isHistoryOpen, setIsHistoryOpen] = useState(false)
 	const [photoFile, setPhotoFile] = useState<File | null>(null)
+	const [careEventPhotoFile, setCareEventPhotoFile] = useState<File | null>(
+		null
+	)
+	const [isCareEventPhotoUploading, setIsCareEventPhotoUploading] =
+		useState(false)
 	const [aiCity, setAiCity] = useState('')
 	const [analysisCity, setAnalysisCity] = useState('')
 	const [analysisQuestion, setAnalysisQuestion] = useState('')
@@ -97,6 +102,11 @@ export function UserPlantViewPage() {
 	const photoPreviewUrl = useMemo(
 		() => (photoFile ? URL.createObjectURL(photoFile) : null),
 		[photoFile]
+	)
+	const careEventPhotoPreviewUrl = useMemo(
+		() =>
+			careEventPhotoFile ? URL.createObjectURL(careEventPhotoFile) : null,
+		[careEventPhotoFile]
 	)
 
 	const { data, isLoading } = useGetUserPlantsById(id)
@@ -121,6 +131,8 @@ export function UserPlantViewPage() {
 	const updatePlantMutation = useUpdateUserPlant(id)
 	const createCareEventMutation = useCreatePlantCareEvent(id)
 	const deleteCareEventMutation = useDeletePlantCareEvent(id)
+	const isCareEventSubmitting =
+		createCareEventMutation.isPending || isCareEventPhotoUploading
 	const aiSuggestMutation = useMutation({
 		mutationKey: ['suggestExistingPlantCare', id],
 		mutationFn: () => {
@@ -231,6 +243,14 @@ export function UserPlantViewPage() {
 	}, [photoPreviewUrl])
 
 	useEffect(() => {
+		return () => {
+			if (careEventPhotoPreviewUrl) {
+				URL.revokeObjectURL(careEventPhotoPreviewUrl)
+			}
+		}
+	}, [careEventPhotoPreviewUrl])
+
+	useEffect(() => {
 		resetDuplicate(getDuplicatePlantValues(data))
 	}, [resetDuplicate, data])
 
@@ -282,13 +302,15 @@ export function UserPlantViewPage() {
 	}
 
 	const openCareEventModal = () => {
+		setCareEventPhotoFile(null)
 		resetCareEvent(getCareEventFormValues())
 		setIsCareEventOpen(true)
 	}
 
 	const closeCareEventModal = () => {
-		if (createCareEventMutation.isPending) return
+		if (isCareEventSubmitting) return
 
+		setCareEventPhotoFile(null)
 		resetCareEvent(getCareEventFormValues())
 		setIsCareEventOpen(false)
 	}
@@ -331,21 +353,40 @@ export function UserPlantViewPage() {
 	}
 
 	const onCareEventSubmit = handleCareEventSubmit(async formValues => {
-		const payload: CreatePlantCareEvent = {
-			type: formValues.type,
-			title: nullableString(formValues.title),
-			description: nullableString(formValues.description),
-			eventAt: careEventDirtyFields.eventAt
-				? toIsoDate(formValues.eventAt)
-				: undefined,
-			amountMl: nullableNumber(formValues.amountMl)
-		}
-		const updatedPlant = await createCareEventMutation.mutateAsync(payload)
+		let photoUrl: string | null = null
 
-		reset(getPlantFormValues(updatedPlant))
-		resetCareEvent(getCareEventFormValues())
-		setIsCareEventOpen(false)
-		toast.success('Событие добавлено в историю')
+		try {
+			if (careEventPhotoFile) {
+				setIsCareEventPhotoUploading(true)
+
+				photoUrl = await userPlantService.uploadCareEventPhoto(
+					id,
+					careEventPhotoFile
+				)
+			}
+
+			const payload: CreatePlantCareEvent = {
+				type: formValues.type,
+				title: nullableString(formValues.title),
+				description: nullableString(formValues.description),
+				eventAt: careEventDirtyFields.eventAt
+					? toIsoDate(formValues.eventAt)
+					: undefined,
+				amountMl: nullableNumber(formValues.amountMl),
+				photoUrl: nullableString(photoUrl)
+			}
+			const updatedPlant = await createCareEventMutation.mutateAsync(payload)
+
+			reset(getPlantFormValues(updatedPlant))
+			setCareEventPhotoFile(null)
+			resetCareEvent(getCareEventFormValues())
+			setIsCareEventOpen(false)
+			toast.success('Событие добавлено в историю')
+		} catch {
+			toast.error('Не удалось добавить событие')
+		} finally {
+			setIsCareEventPhotoUploading(false)
+		}
 	})
 
 	const onSubmit = handleSubmit(async formValues => {
@@ -490,9 +531,13 @@ export function UserPlantViewPage() {
 			/>
 			<CareEventModal
 				isOpen={isCareEventOpen}
-				isPending={createCareEventMutation.isPending}
+				isPending={isCareEventSubmitting}
+				photoFileName={careEventPhotoFile?.name}
+				photoPreviewUrl={careEventPhotoPreviewUrl}
 				register={registerCareEvent}
 				onClose={closeCareEventModal}
+				onPhotoChange={setCareEventPhotoFile}
+				onPhotoRemove={() => setCareEventPhotoFile(null)}
 				onSubmit={onCareEventSubmit}
 			/>
 			<CareHistoryModal

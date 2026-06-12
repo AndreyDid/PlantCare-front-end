@@ -90,6 +90,23 @@ class UserPlantService {
 		return getAbsoluteUploadUrl(response.data.url)
 	}
 
+	async uploadCareEventPhoto(id: string, file: File) {
+		const formData = new FormData()
+		formData.append('file', file)
+
+		const response = await axiosWithAuth.post<{ url: string }>(
+			`${this.BASE_URL}/${id}/events/upload-photo`,
+			formData,
+			{
+				headers: {
+					'Content-Type': 'multipart/form-data'
+				}
+			}
+		)
+
+		return getAbsoluteUploadUrl(response.data.url)
+	}
+
 	async getPhotoGallery() {
 		const response = await axiosWithAuth.get<PhotoGalleryItem[]>(
 			`${this.BASE_URL}/photos`

@@ -1,5 +1,7 @@
 import { History } from 'lucide-react'
+import Image from 'next/image'
 
+import { CareEventTypeIcon } from '@/src/components/CareEventTypeIcon'
 import { formatDateTime } from '@/src/shared/utils/date.utils'
 import {
 	getCareEventMeta,
@@ -47,19 +49,38 @@ export function CareHistoryPreview({
 					{events.slice(0, 3).map(event => (
 						<article
 							key={event.id}
-							className='rounded-2xl border border-white/8 bg-black/10 p-3 sm:rounded-[20px] sm:p-4'
+							className='flex min-w-0 gap-3 rounded-2xl border border-white/8 bg-black/10 p-3 sm:rounded-[20px] sm:p-4'
 						>
-							<p className='text-xs font-semibold text-white sm:text-sm'>
-								{getCareEventTitle(event)}
-							</p>
-							<time className='mt-2 block text-xs text-white/45'>
-								{formatDateTime(event.eventAt)}
-							</time>
-							{getCareEventMeta(event) ? (
-								<p className='mt-2 text-xs text-emerald-100/70'>
-									{getCareEventMeta(event)}
+							<div className='relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[14px] border border-white/10 bg-white/8 text-emerald-100'>
+								{event.photoUrl ? (
+									<Image
+										src={event.photoUrl}
+										alt=''
+										fill
+										unoptimized
+										sizes='44px'
+										className='object-cover'
+									/>
+								) : (
+									<CareEventTypeIcon
+										type={event.type}
+										size={18}
+									/>
+								)}
+							</div>
+							<div className='min-w-0'>
+								<p className='truncate text-xs font-semibold text-white sm:text-sm'>
+									{getCareEventTitle(event)}
 								</p>
-							) : null}
+								<time className='mt-2 block text-xs text-white/45'>
+									{formatDateTime(event.eventAt)}
+								</time>
+								{getCareEventMeta(event) ? (
+									<p className='mt-2 text-xs text-emerald-100/70'>
+										{getCareEventMeta(event)}
+									</p>
+								) : null}
+							</div>
 						</article>
 					))}
 				</div>

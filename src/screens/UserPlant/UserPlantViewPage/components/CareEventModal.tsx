@@ -1,4 +1,6 @@
-import type { FormEventHandler } from 'react'
+import { ImagePlus, Trash2, Upload } from 'lucide-react'
+import Image from 'next/image'
+import type { ChangeEvent, FormEventHandler } from 'react'
 import type { UseFormRegister } from 'react-hook-form'
 
 import { Button } from '@/src/components/ui/buttons/Button'
@@ -11,7 +13,11 @@ import type { CareEventForm } from '@/src/shared/utils/user-plant-form.utils'
 interface CareEventModalProps {
 	isOpen: boolean
 	isPending: boolean
+	photoFileName?: string | null
+	photoPreviewUrl?: string | null
 	onClose: () => void
+	onPhotoChange: (file: File | null) => void
+	onPhotoRemove: () => void
 	onSubmit: FormEventHandler<HTMLFormElement>
 	register: UseFormRegister<CareEventForm>
 }
@@ -19,10 +25,19 @@ interface CareEventModalProps {
 export function CareEventModal({
 	isOpen,
 	isPending,
+	photoFileName,
+	photoPreviewUrl,
 	onClose,
+	onPhotoChange,
+	onPhotoRemove,
 	onSubmit,
 	register
 }: CareEventModalProps) {
+	const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
+		onPhotoChange(event.target.files?.[0] ?? null)
+		event.target.value = ''
+	}
+
 	return (
 		<Modal
 			isOpen={isOpen}
@@ -95,6 +110,71 @@ export function CareEventModal({
 					className='mt-2 mb-5 w-full resize-none rounded-[18px] border border-white/10 bg-white/6 px-4 py-3.5 text-base text-white outline-none transition duration-200 placeholder:font-normal placeholder:text-white/30 focus:border-emerald-300/70 focus:bg-white/8'
 					{...register('description')}
 				/>
+				<div className='mb-5'>
+					<div className='mb-2 flex items-center justify-between gap-3'>
+						<label
+							htmlFor='careEventPhoto'
+							className='ml-1.5 text-sm font-medium tracking-[0.02em] text-white/72'
+						>
+							Фото к событию
+						</label>
+						{photoPreviewUrl ? (
+							<button
+								type='button'
+								className='inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-black/15 text-white/60 transition hover:bg-red-400/10 hover:text-red-100'
+								onClick={onPhotoRemove}
+								disabled={isPending}
+								aria-label='Убрать фото события'
+							>
+								<Trash2 size={15} />
+							</button>
+						) : null}
+					</div>
+					{photoPreviewUrl ? (
+						<div className='relative aspect-[4/3] overflow-hidden rounded-[18px] border border-white/10 bg-black/15'>
+							<Image
+								src={photoPreviewUrl}
+								alt=''
+								fill
+								unoptimized
+								sizes='(max-width: 640px) 100vw, 520px'
+								className='object-cover'
+							/>
+							{photoFileName ? (
+								<div className='absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full border border-white/14 bg-black/35 px-3 py-1 text-xs text-white/75 backdrop-blur-md'>
+									{photoFileName}
+								</div>
+							) : null}
+						</div>
+					) : (
+						<label className='flex cursor-pointer items-center justify-center gap-2 rounded-[18px] border border-dashed border-white/14 bg-white/[0.035] px-4 py-5 text-sm font-medium text-white/62 transition hover:border-emerald-200/35 hover:bg-emerald-300/10 hover:text-emerald-50'>
+							<ImagePlus size={18} />
+							Загрузить фото
+							<input
+								id='careEventPhoto'
+								type='file'
+								accept='image/*'
+								className='sr-only'
+								disabled={isPending}
+								onChange={handlePhotoChange}
+							/>
+						</label>
+					)}
+					{photoPreviewUrl ? (
+						<label className='mt-3 inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-white/10 bg-black/15 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/10'>
+							<Upload size={16} />
+							Заменить фото
+							<input
+								id='careEventPhoto'
+								type='file'
+								accept='image/*'
+								className='sr-only'
+								disabled={isPending}
+								onChange={handlePhotoChange}
+							/>
+						</label>
+					) : null}
+				</div>
 				<div className='flex flex-col-reverse gap-3 sm:flex-row sm:justify-end'>
 					<Button
 						type='button'
@@ -116,4 +196,3 @@ export function CareEventModal({
 		</Modal>
 	)
 }
-

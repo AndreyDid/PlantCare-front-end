@@ -3,19 +3,16 @@
 import {
 	CalendarDays,
 	Clock3,
-	Droplets,
-	Eye,
 	Filter,
-	FlaskConical,
 	History,
-	RefreshCw,
 	RotateCcw,
-	Sprout,
-	StickyNote
+	Sprout
 } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useMemo, useState } from 'react'
 
+import { CareEventTypeIcon } from '@/src/components/CareEventTypeIcon'
 import { Button } from '@/src/components/ui/buttons/Button'
 import { DASHBOARD_PAGES } from '@/src/config/pages-url.config'
 import { useAllPlantCareEvents, useUserPlants } from '@/src/hooks/userPlants'
@@ -88,21 +85,6 @@ function getCareEventIconClass(type: PlantCareEventType) {
 	return 'border-white/14 bg-white/8 text-white/75'
 }
 
-function CareEventIcon({
-	size,
-	type
-}: {
-	size: number
-	type: PlantCareEventType
-}) {
-	if (type === 'WATERING') return <Droplets size={size} />
-	if (type === 'FERTILIZING') return <FlaskConical size={size} />
-	if (type === 'REPOTTING') return <RefreshCw size={size} />
-	if (type === 'OBSERVATION') return <Eye size={size} />
-
-	return <StickyNote size={size} />
-}
-
 function getActiveFiltersCount(filters: PlantCareEventFilters) {
 	return Object.values(filters).filter(Boolean).length
 }
@@ -116,12 +98,27 @@ function CareHistoryEventRow({ event }: { event: PlantCareEventWithPlant }) {
 			<div className='pointer-events-none absolute inset-y-4 left-[34px] hidden w-px bg-gradient-to-b from-transparent via-white/12 to-transparent lg:block' />
 			<div className='relative grid min-w-0 gap-3 lg:grid-cols-[48px_minmax(0,1fr)_minmax(230px,0.34fr)] lg:items-start'>
 				<div
-					className={`flex h-10 w-10 items-center justify-center rounded-[14px] border sm:h-11 sm:w-11 sm:rounded-2xl ${getCareEventIconClass(event.type)}`}
+					className={
+						event.photoUrl
+							? 'relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-[14px] border border-white/10 bg-white/8 sm:h-11 sm:w-11 sm:rounded-2xl'
+							: `flex h-10 w-10 items-center justify-center rounded-[14px] border sm:h-11 sm:w-11 sm:rounded-2xl ${getCareEventIconClass(event.type)}`
+					}
 				>
-					<CareEventIcon
-						type={event.type}
-						size={19}
-					/>
+					{event.photoUrl ? (
+						<Image
+							src={event.photoUrl}
+							alt=''
+							fill
+							unoptimized
+							sizes='44px'
+							className='object-cover'
+						/>
+					) : (
+						<CareEventTypeIcon
+							type={event.type}
+							size={19}
+						/>
+					)}
 				</div>
 
 				<div className='min-w-0'>
@@ -129,7 +126,7 @@ function CareHistoryEventRow({ event }: { event: PlantCareEventWithPlant }) {
 						<span
 							className={`inline-flex min-h-8 items-center gap-1.5 rounded-xl border px-3 py-1 text-xs font-semibold ${getCareEventBadgeClass(event.type)}`}
 						>
-							<CareEventIcon
+							<CareEventTypeIcon
 								type={event.type}
 								size={14}
 							/>

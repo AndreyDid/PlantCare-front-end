@@ -17,6 +17,7 @@ export type CareEventForm = {
 	description: string
 	eventAt: string
 	amountMl?: number | null
+	photoUrl?: string | null
 }
 
 export function getPlantFormValues(
@@ -53,7 +54,8 @@ export function getCareEventFormValues(): CareEventForm {
 		title: '',
 		description: '',
 		eventAt: toDateTimeInputValue(),
-		amountMl: null
+		amountMl: null,
+		photoUrl: null
 	}
 }
 
