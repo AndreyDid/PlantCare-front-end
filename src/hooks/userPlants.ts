@@ -4,6 +4,7 @@ import { userPlantService } from '../services/userPlant.service'
 import {
 	CreatePlantCareEvent,
 	PlantCareEventFilters,
+	UpdatePlantCareEvent,
 	UpdateUserPlant
 } from '../types/plants.types'
 
@@ -83,6 +84,22 @@ export function useCreatePlantCareEvent(id: string) {
 	return useMutation({
 		mutationFn: (data: CreatePlantCareEvent) =>
 			userPlantService.createCareEvent(id, data),
+		onSuccess: () => {
+			invalidateUserPlantQueries(queryClient)
+		}
+	})
+}
+
+export function useUpdatePlantCareEvent(id: string) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: ({
+			data,
+			eventId
+		}: {
+			data: UpdatePlantCareEvent
+			eventId: string
+		}) => userPlantService.updateCareEvent(id, eventId, data),
 		onSuccess: () => {
 			invalidateUserPlantQueries(queryClient)
 		}

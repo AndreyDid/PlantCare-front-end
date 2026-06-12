@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 
 import { CareEventTypeIcon } from '@/src/components/CareEventTypeIcon'
@@ -17,6 +17,7 @@ interface CareHistoryModalProps {
 	deletingEventId?: string
 	onClose: () => void
 	onDelete: (eventId: string) => void
+	onEdit: (event: PlantCareEvent) => void
 }
 
 export function CareHistoryModal({
@@ -25,7 +26,8 @@ export function CareHistoryModal({
 	isOpen,
 	deletingEventId,
 	onClose,
-	onDelete
+	onDelete,
+	onEdit
 }: CareHistoryModalProps) {
 	return (
 		<Modal
@@ -79,6 +81,15 @@ export function CareHistoryModal({
 									<time className='text-xs text-white/45'>
 										{formatDateTime(event.eventAt)}
 									</time>
+									<button
+										type='button'
+										aria-label='Редактировать событие'
+										title='Редактировать событие'
+										className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-3xl border border-white/10 bg-white/6 text-white/55 transition hover:border-emerald-200/30 hover:bg-emerald-300/10 hover:text-emerald-50'
+										onClick={() => onEdit(event)}
+									>
+										<Pencil size={16} />
+									</button>
 									<button
 										type='button'
 										aria-label='Удалить событие'

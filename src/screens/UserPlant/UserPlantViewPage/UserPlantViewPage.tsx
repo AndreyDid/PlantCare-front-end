@@ -22,6 +22,7 @@ import {
 	useCreatePlantCareEvent,
 	useDeletePlantCareEvent,
 	useGetUserPlantsById,
+	useUpdatePlantCareEvent,
 	useUpdateUserPlant
 } from '@/src/hooks/userPlants'
 import { useUserProfile } from '@/src/hooks/userProfile'
@@ -50,6 +51,7 @@ import type {
 	CreatePlantCareEvent,
 	PlantAiSuggestion,
 	PlantCareAnalysis,
+	PlantCareEvent,
 	UpdateUserPlant
 } from '@/src/types/plants.types'
 
@@ -88,6 +90,11 @@ export function UserPlantViewPage() {
 	const [careEventPhotoFile, setCareEventPhotoFile] = useState<File | null>(
 		null
 	)
+	const [careEventPhotoUrl, setCareEventPhotoUrl] = useState<string | null>(
+		null
+	)
+	const [selectedCareEvent, setSelectedCareEvent] =
+		useState<PlantCareEvent | null>(null)
 	const [isCareEventPhotoUploading, setIsCareEventPhotoUploading] =
 		useState(false)
 	const [aiCity, setAiCity] = useState('')
@@ -103,11 +110,13 @@ export function UserPlantViewPage() {
 		() => (photoFile ? URL.createObjectURL(photoFile) : null),
 		[photoFile]
 	)
-	const careEventPhotoPreviewUrl = useMemo(
+	const careEventPhotoObjectUrl = useMemo(
 		() =>
 			careEventPhotoFile ? URL.createObjectURL(careEventPhotoFile) : null,
 		[careEventPhotoFile]
 	)
+	const careEventPhotoPreviewUrl =
+		careEventPhotoObjectUrl ?? careEventPhotoUrl
 
 	const { data, isLoading } = useGetUserPlantsById(id)
 	const { data: profileData } = useUserProfile()
@@ -130,9 +139,12 @@ export function UserPlantViewPage() {
 
 	const updatePlantMutation = useUpdateUserPlant(id)
 	const createCareEventMutation = useCreatePlantCareEvent(id)
+	const updateCareEventMutation = useUpdatePlantCareEvent(id)
 	const deleteCareEventMutation = useDeletePlantCareEvent(id)
 	const isCareEventSubmitting =
-		createCareEventMutation.isPending || isCareEventPhotoUploading
+		createCareEventMutation.isPending ||
+		updateCareEventMutation.isPending ||
+		isCareEventPhotoUploading
 	const aiSuggestMutation = useMutation({
 		mutationKey: ['suggestExistingPlantCare', id],
 		mutationFn: () => {
@@ -244,11 +256,11 @@ export function UserPlantViewPage() {
 
 	useEffect(() => {
 		return () => {
-			if (careEventPhotoPreviewUrl) {
-				URL.revokeObjectURL(careEventPhotoPreviewUrl)
+			if (careEventPhotoObjectUrl) {
+				URL.revokeObjectURL(careEventPhotoObjectUrl)
 			}
 		}
-	}, [careEventPhotoPreviewUrl])
+	}, [careEventPhotoObjectUrl])
 
 	useEffect(() => {
 		resetDuplicate(getDuplicatePlantValues(data))
@@ -302,15 +314,27 @@ export function UserPlantViewPage() {
 	}
 
 	const openCareEventModal = () => {
+		setSelectedCareEvent(null)
 		setCareEventPhotoFile(null)
+		setCareEventPhotoUrl(null)
 		resetCareEvent(getCareEventFormValues())
+		setIsCareEventOpen(true)
+	}
+
+	const openEditCareEventModal = (event: PlantCareEvent) => {
+		setSelectedCareEvent(event)
+		setCareEventPhotoFile(null)
+		setCareEventPhotoUrl(event.photoUrl)
+		resetCareEvent(getCareEventFormValues(event))
 		setIsCareEventOpen(true)
 	}
 
 	const closeCareEventModal = () => {
 		if (isCareEventSubmitting) return
 
+		setSelectedCareEvent(null)
 		setCareEventPhotoFile(null)
+		setCareEventPhotoUrl(null)
 		resetCareEvent(getCareEventFormValues())
 		setIsCareEventOpen(false)
 	}
@@ -353,7 +377,7 @@ export function UserPlantViewPage() {
 	}
 
 	const onCareEventSubmit = handleCareEventSubmit(async formValues => {
-		let photoUrl: string | null = null
+		let photoUrl: string | null = careEventPhotoUrl
 
 		try {
 			if (careEventPhotoFile) {
@@ -369,21 +393,37 @@ export function UserPlantViewPage() {
 				type: formValues.type,
 				title: nullableString(formValues.title),
 				description: nullableString(formValues.description),
-				eventAt: careEventDirtyFields.eventAt
-					? toIsoDate(formValues.eventAt)
-					: undefined,
+				eventAt:
+					selectedCareEvent || careEventDirtyFields.eventAt
+						? toIsoDate(formValues.eventAt)
+						: undefined,
 				amountMl: nullableNumber(formValues.amountMl),
 				photoUrl: nullableString(photoUrl)
 			}
-			const updatedPlant = await createCareEventMutation.mutateAsync(payload)
+			const updatedPlant = selectedCareEvent
+				? await updateCareEventMutation.mutateAsync({
+						eventId: selectedCareEvent.id,
+						data: payload
+					})
+				: await createCareEventMutation.mutateAsync(payload)
 
 			reset(getPlantFormValues(updatedPlant))
+			setSelectedCareEvent(null)
 			setCareEventPhotoFile(null)
+			setCareEventPhotoUrl(null)
 			resetCareEvent(getCareEventFormValues())
 			setIsCareEventOpen(false)
-			toast.success('Событие добавлено в историю')
+			toast.success(
+				selectedCareEvent
+					? 'Событие обновлено'
+					: 'Событие добавлено в историю'
+			)
 		} catch {
-			toast.error('Не удалось добавить событие')
+			toast.error(
+				selectedCareEvent
+					? 'Не удалось обновить событие'
+					: 'Не удалось добавить событие'
+			)
 		} finally {
 			setIsCareEventPhotoUploading(false)
 		}
@@ -532,12 +572,19 @@ export function UserPlantViewPage() {
 			<CareEventModal
 				isOpen={isCareEventOpen}
 				isPending={isCareEventSubmitting}
+				mode={selectedCareEvent ? 'edit' : 'create'}
 				photoFileName={careEventPhotoFile?.name}
 				photoPreviewUrl={careEventPhotoPreviewUrl}
 				register={registerCareEvent}
 				onClose={closeCareEventModal}
-				onPhotoChange={setCareEventPhotoFile}
-				onPhotoRemove={() => setCareEventPhotoFile(null)}
+				onPhotoChange={file => {
+					setCareEventPhotoFile(file)
+					if (file) setCareEventPhotoUrl(null)
+				}}
+				onPhotoRemove={() => {
+					setCareEventPhotoFile(null)
+					setCareEventPhotoUrl(null)
+				}}
 				onSubmit={onCareEventSubmit}
 			/>
 			<CareHistoryModal
@@ -547,6 +594,7 @@ export function UserPlantViewPage() {
 				deletingEventId={deleteCareEventMutation.variables}
 				onClose={() => setIsHistoryOpen(false)}
 				onDelete={handleDeleteCareEvent}
+				onEdit={openEditCareEventModal}
 			/>
 			<DuplicatePlantModal
 				isOpen={isDuplicateOpen}

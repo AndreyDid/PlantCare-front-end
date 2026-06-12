@@ -13,6 +13,7 @@ import type { CareEventForm } from '@/src/shared/utils/user-plant-form.utils'
 interface CareEventModalProps {
 	isOpen: boolean
 	isPending: boolean
+	mode?: 'create' | 'edit'
 	photoFileName?: string | null
 	photoPreviewUrl?: string | null
 	onClose: () => void
@@ -25,6 +26,7 @@ interface CareEventModalProps {
 export function CareEventModal({
 	isOpen,
 	isPending,
+	mode = 'create',
 	photoFileName,
 	photoPreviewUrl,
 	onClose,
@@ -33,6 +35,7 @@ export function CareEventModal({
 	onSubmit,
 	register
 }: CareEventModalProps) {
+	const isEditMode = mode === 'edit'
 	const handlePhotoChange = (event: ChangeEvent<HTMLInputElement>) => {
 		onPhotoChange(event.target.files?.[0] ?? null)
 		event.target.value = ''
@@ -42,11 +45,19 @@ export function CareEventModal({
 		<Modal
 			isOpen={isOpen}
 			onClose={onClose}
-			title='Добавить событие'
+			title={isEditMode ? 'Редактировать событие' : 'Добавить событие'}
 			titleId='care-event-title'
 			eyebrow='Care Log'
-			description='Зафиксируйте полив, подкормку, пересадку или заметку. Так история остается отдельно от основной карточки.'
-			closeLabel='Закрыть добавление события'
+			description={
+				isEditMode
+					? 'Обновите дату, описание, фото или тип записи в истории ухода.'
+					: 'Зафиксируйте полив, подкормку, пересадку или заметку. Так история остается отдельно от основной карточки.'
+			}
+			closeLabel={
+				isEditMode
+					? 'Закрыть редактирование события'
+					: 'Закрыть добавление события'
+			}
 			closeOnOverlayClick={!isPending}
 		>
 			<form onSubmit={onSubmit}>
@@ -189,7 +200,13 @@ export function CareEventModal({
 						disabled={isPending}
 						className='rounded-2xl border-0 bg-gradient-to-r from-emerald-300 via-emerald-400 to-lime-300 px-5 py-3 font-semibold text-slate-950 shadow-[0_18px_36px_rgba(72,187,120,0.28)] hover:from-emerald-200 hover:via-emerald-300 hover:to-lime-200 disabled:cursor-not-allowed disabled:opacity-70'
 					>
-						{isPending ? 'Добавляем...' : 'Добавить событие'}
+						{isPending
+							? isEditMode
+								? 'Сохраняем...'
+								: 'Добавляем...'
+							: isEditMode
+								? 'Сохранить изменения'
+								: 'Добавить событие'}
 					</Button>
 				</div>
 			</form>

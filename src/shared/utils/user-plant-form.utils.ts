@@ -5,6 +5,7 @@ import { nullableNumber, nullableString } from './nullable.utils'
 import type {
 	CreateUserPlant,
 	GetUserPlantById,
+	PlantCareEvent,
 	PlantCareEventType,
 	UpdateUserPlant
 } from '@/src/types/plants.types'
@@ -48,14 +49,16 @@ export function getPlantFormValues(
 	}
 }
 
-export function getCareEventFormValues(): CareEventForm {
+export function getCareEventFormValues(
+	event?: PlantCareEvent | null
+): CareEventForm {
 	return {
-		type: 'NOTE',
-		title: '',
-		description: '',
-		eventAt: toDateTimeInputValue(),
-		amountMl: null,
-		photoUrl: null
+		type: event?.type ?? 'NOTE',
+		title: event?.title ?? '',
+		description: event?.description ?? '',
+		eventAt: toDateTimeInputValue(event?.eventAt),
+		amountMl: event?.amountMl ?? null,
+		photoUrl: event?.photoUrl ?? null
 	}
 }
 

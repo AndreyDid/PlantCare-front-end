@@ -13,6 +13,7 @@ import {
 	PlantForm,
 	SuggestPlantCareRequest,
 	UpdateUserPlant,
+	UpdatePlantCareEvent,
 	WateringOverview,
 	WeatherWateringOverview
 } from '../types/plants.types'
@@ -189,6 +190,19 @@ class UserPlantService {
 	async createCareEvent(id: string, data: CreatePlantCareEvent) {
 		const response = await axiosWithAuth.post<GetUserPlantById>(
 			`${this.BASE_URL}/${id}/events`,
+			data
+		)
+
+		return response.data
+	}
+
+	async updateCareEvent(
+		id: string,
+		eventId: string,
+		data: UpdatePlantCareEvent
+	) {
+		const response = await axiosWithAuth.put<GetUserPlantById>(
+			`${this.BASE_URL}/${id}/events/${eventId}`,
 			data
 		)
 

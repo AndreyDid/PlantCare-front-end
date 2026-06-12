@@ -180,6 +180,8 @@ export interface CreatePlantCareEvent {
 	photoUrl?: string | null
 }
 
+export type UpdatePlantCareEvent = Partial<CreatePlantCareEvent>
+
 export interface GetUserPlantById {
 	id: string
 	nickname: string
