@@ -8,8 +8,8 @@ import {
 	RotateCcw,
 	Sprout
 } from 'lucide-react'
-import Link from 'next/link'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { CareEventTypeIcon } from '@/src/components/CareEventTypeIcon'
@@ -83,10 +83,6 @@ function getCareEventIconClass(type: PlantCareEventType) {
 	}
 
 	return 'border-white/14 bg-white/8 text-white/75'
-}
-
-function getActiveFiltersCount(filters: PlantCareEventFilters) {
-	return Object.values(filters).filter(Boolean).length
 }
 
 function CareHistoryEventRow({ event }: { event: PlantCareEventWithPlant }) {
@@ -217,7 +213,6 @@ export function CareHistoryPage() {
 		}),
 		[dateFrom, dateTo, plantId, type]
 	)
-	const activeFiltersCount = getActiveFiltersCount(filters)
 	const { data: plantsData, isLoading: arePlantsLoading } = useUserPlants()
 	const { data: eventsData, isLoading: areEventsLoading } =
 		useAllPlantCareEvents(filters)
@@ -264,33 +259,14 @@ export function CareHistoryPage() {
 			<section className='rounded-[18px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-2.5 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:rounded-[28px] sm:p-6 lg:rounded-[32px] lg:p-8'>
 				<div className='mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:mb-6 sm:gap-4 sm:pb-5 lg:flex-row lg:items-end lg:justify-between'>
 					<div>
-						<p className='mb-2 text-[10px] uppercase tracking-[0.22em] text-emerald-100/60 sm:mb-3 sm:text-xs sm:tracking-[0.32em]'>
-							Care History
-						</p>
-						<h1 className='text-xl font-semibold text-white sm:text-3xl'>
+						<h2 className='mb-2  uppercase tracking-[0.22em] text-emerald-100/60 sm:mb-3  sm:tracking-[0.32em]'>
 							История ухода
-						</h1>
+						</h2>
+
 						<p className='mt-2 max-w-2xl text-sm leading-6 text-white/60 sm:mt-3'>
-							Общая лента поливов, подкормок, пересадок и заметок по всем растениям.
+							Общая лента поливов, подкормок, пересадок и заметок по всем
+							растениям.
 						</p>
-					</div>
-					<div className='grid grid-cols-2 gap-2 sm:flex sm:gap-3'>
-						<div className='rounded-2xl border border-white/10 bg-black/10 px-3 py-2.5 sm:px-4 sm:py-3'>
-							<p className='text-[10px] uppercase tracking-[0.14em] text-white/40 sm:tracking-[0.2em]'>
-								Событий
-							</p>
-							<p className='mt-1 text-xl font-semibold text-white sm:text-2xl'>
-								{events.length}
-							</p>
-						</div>
-						<div className='rounded-2xl border border-white/10 bg-black/10 px-3 py-2.5 sm:px-4 sm:py-3'>
-							<p className='text-[10px] uppercase tracking-[0.14em] text-white/40 sm:tracking-[0.2em]'>
-								Фильтров
-							</p>
-							<p className='mt-1 text-xl font-semibold text-white sm:text-2xl'>
-								{activeFiltersCount}
-							</p>
-						</div>
 					</div>
 				</div>
 
@@ -371,8 +347,7 @@ export function CareHistoryPage() {
 							className='h-10 w-full rounded-2xl px-3 text-xs text-emerald-50 hover:bg-white/8 sm:w-auto'
 							onClick={setLastWeekFilter}
 						>
-							<CalendarDays size={15} />
-							7 дней
+							<CalendarDays size={15} />7 дней
 						</Button>
 						<Button
 							type='button'
@@ -491,7 +466,8 @@ export function CareHistoryPage() {
 							Событий не найдено
 						</h2>
 						<p className='mx-auto mt-3 max-w-md text-sm leading-6 text-white/60'>
-							Попробуйте изменить фильтры или добавьте событие в карточке растения.
+							Попробуйте изменить фильтры или добавьте событие в карточке
+							растения.
 						</p>
 					</div>
 				)}

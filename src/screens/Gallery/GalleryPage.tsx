@@ -105,15 +105,17 @@ function getPhotoGroupSubtitle(photo: PhotoGalleryItem) {
 	return 'Фото без привязки к растению'
 }
 
-function getFilterCount(photos: PhotoGalleryItem[], value: GallerySourceFilter) {
+function getFilterCount(
+	photos: PhotoGalleryItem[],
+	value: GallerySourceFilter
+) {
 	if (value === 'all') return photos.length
 
 	return photos.filter(photo => photo.source === value).length
 }
 
 export function GalleryPage() {
-	const [sourceFilter, setSourceFilter] =
-		useState<GallerySourceFilter>('all')
+	const [sourceFilter, setSourceFilter] = useState<GallerySourceFilter>('all')
 	const { data, isLoading } = usePhotoGallery()
 	const deletePhotoMutation = useDeleteGalleryPhoto()
 	const queryClient = useQueryClient()
@@ -187,10 +189,7 @@ export function GalleryPage() {
 			<section className='rounded-[32px] border border-white/12 bg-[linear-gradient(180deg,rgba(255,255,255,0.1),rgba(255,255,255,0.05))] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.3)] backdrop-blur-2xl sm:p-8'>
 				<div className='mb-5 flex flex-col gap-4 border-b border-white/10 pb-6 lg:flex-row lg:items-end lg:justify-between'>
 					<div>
-						<p className='mb-3 text-xs uppercase tracking-[0.32em] text-emerald-100/60'>
-							Gallery
-						</p>
-						<h2 className='text-2xl font-semibold text-white sm:text-3xl'>
+						<h2 className='mb-3 uppercase tracking-[0.32em] text-emerald-100/60'>
 							Галерея
 						</h2>
 					</div>
